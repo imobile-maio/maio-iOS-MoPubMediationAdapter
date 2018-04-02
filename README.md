@@ -10,12 +10,12 @@
 1. Click on `New network`.
 1. On the bottom of the modal, click on `Custom SDK network`.
 1. Input the `Network settings` as below, and click `Next`:
-    - Network name: maio
+    - `Network name`: `maio`
 1. Click `Next` for the `Default CPM preferences`.
 1. Input the `App & ad unit setup` as below, and click `Save & Close`:
     - Interstitial
         - Custom Event Class
-            - MaioInterstitial
+            - `MaioInterstitial`
         - Custom Event Class Data
             ```json
             {"mediaId": "YOUR-MEDIA-ID", "zoneId": "YOUR-ZONE-ID"}
@@ -24,7 +24,7 @@
             ```
     - Rewarded Video
         - Custom Event Class
-            - MaioRewardedVideo
+            - `MaioRewardedVideo`
         - Custom Event Class Data
             ```json
             {"mediaId": "YOUR-MEDIA-ID", "zoneId": "YOUR-ZONE-ID"}
