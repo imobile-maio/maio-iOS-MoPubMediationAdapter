@@ -11,7 +11,7 @@
 1. On the bottom of the modal, click on `Custom SDK network`.
 1. Input the `Network settings` as below, and click `Next`:
     - Network name: maio
-1. Click `Next` for the Default CPM preferences.
+1. Click `Next` for the `Default CPM preferences`.
 1. Input the `App & ad unit setup` as below, and click `Save & Close`:
     - Interstitial
         - Custom Event Class
