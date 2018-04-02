@@ -9,8 +9,10 @@
 #import <Foundation/Foundation.h>
 #import <Maio/Maio.h>
 
-@interface MaioManager : NSObject
+@interface MaioManager : NSObject<MaioDelegate>
 +(MaioManager *)sharedInstance;
--(BOOL)isInitialized;
--(void)setIsInitialized:(BOOL)isInitialized;
+-(void) startWithMediaId:(NSString *)mediaId delegate:(id<MaioDelegate>)delegate;
+-(BOOL) isInitialized:(NSString *)mediaId;
+-(BOOL) canShowAtMediaId:(NSString *)mediaId zoneId:(NSString *)zoneId;
+-(void) showAtMediaId:(NSString *)mediaId zoneId:(NSString *)zoneId;
 @end

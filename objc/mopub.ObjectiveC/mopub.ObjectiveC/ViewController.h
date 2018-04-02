@@ -7,9 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "MPInterstitialAdController.h"
+#import "MoPub.h"
 
-@interface ViewController : UIViewController<MPInterstitialAdControllerDelegate>
+@interface ViewController : UIViewController<MPInterstitialAdControllerDelegate, MPRewardedVideoDelegate>
 @property (nonatomic, retain) MPInterstitialAdController *interstitial;
 
 @end

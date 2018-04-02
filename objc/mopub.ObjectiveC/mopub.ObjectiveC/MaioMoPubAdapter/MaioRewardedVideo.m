@@ -10,68 +10,72 @@
 #import "MPLogging.h"
 #import "MaioCredentials.h"
 #import "MaioManager.h"
+#import "MaioError.h"
 
 @implementation MaioRewardedVideo {
     MaioCredentials *_credentials;
+    BOOL _isRequestedAd;
 }
 
 -(void)initializeSdkWithParameters:(NSDictionary *)parameters
 {
-    if([MaioManager sharedInstance].isInitialized) {
-        [Maio setDelegate:self];
-        return;
-    }
-    
-    [self initializeMaioSdkWithInfo:parameters];
+    _credentials = [MaioCredentials credentialsFromDictionary:parameters];
+    [self initializeMaioSdk];
 }
 
 -(void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info
 {
-    if(![MaioManager sharedInstance].isInitialized) {
-        [self initializeMaioSdkWithInfo:info];
+    MaioManager *manager = [MaioManager sharedInstance];
+    MaioCredentials *credentials = [MaioCredentials credentialsFromDictionary:info];
+    if(!credentials) {
+        [self.delegate rewardedVideoDidFailToLoadAdForCustomEvent:self error:[MaioError credentials]];
+    }
+    _credentials = credentials;
+    
+    if([manager isInitialized:credentials.mediaId] == NO) {
+        _isRequestedAd = YES;
+        [self initializeMaioSdk];
         return;
     }
     
-    if([Maio canShowAtZoneId:_credentials.zoneId]) {
+    
+    if([manager canShowAtMediaId:credentials.mediaId zoneId:credentials.zoneId]) {
         [self.delegate rewardedVideoDidLoadAdForCustomEvent:self];
     } else {
-        [self.delegate rewardedVideoDidFailToLoadAdForCustomEvent:self error:nil];
+        _isRequestedAd = YES;
     }
 }
 
--(void)initializeMaioSdkWithInfo:(NSDictionary *)info {
-    
-    _credentials = [MaioCredentials credentialsFromDictionary:info];
+-(void)initializeMaioSdk {
     if(!_credentials) {
-        MPLogError(@"MaioRewardedVideo: invalid parameters\n%@", info.description);
+        MPLogError(@"MaioRewardedVideo: invalid parameters");
         return;
     }
     
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        [Maio startWithMediaId:_credentials.mediaId delegate:self];
-    });
+    MaioManager *manager = [MaioManager sharedInstance];
+    [manager startWithMediaId:_credentials.mediaId delegate:self];
 }
 
 -(BOOL)hasAdAvailable {
-    return [Maio canShowAtZoneId:_credentials.zoneId];
+    return [[MaioManager sharedInstance] canShowAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId];
 }
 
 -(void)presentRewardedVideoFromViewController:(UIViewController *)viewController {
-    [Maio showAtZoneId:_credentials.zoneId];
+    [[MaioManager sharedInstance] showAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId];
 }
 
 #pragma mark - MaioDelegate
 
--(void)maioDidInitialize {
-    [[MaioManager sharedInstance] setIsInitialized:YES];
-}
-
 -(void)maioDidChangeCanShow:(NSString *)zoneId newValue:(BOOL)newValue
 {
-    NSLog(@"change can show tp %d", newValue);
+    if(_credentials.zoneId && ![zoneId isEqualToString:_credentials.zoneId]) {
+        return;
+    }
     
-    if(zoneId && ![zoneId isEqualToString:_credentials.zoneId]) return;
+    if(_isRequestedAd == NO) {
+        return;
+    }
+    _isRequestedAd = NO;
     
     if(newValue)
     {
@@ -80,30 +84,46 @@
 }
 
 -(void)maioDidClickAd:(NSString *)zoneId {
-    if(zoneId && ![zoneId isEqualToString:_credentials.zoneId]) return;
+    if(_credentials.zoneId && ![zoneId isEqualToString:_credentials.zoneId]) {
+        return;
+    }
     
     [self.delegate rewardedVideoDidReceiveTapEventForCustomEvent:self];
     [self.delegate rewardedVideoWillLeaveApplicationForCustomEvent:self];
 }
 
 -(void)maioWillStartAd:(NSString *)zoneId {
-    if(zoneId && ![zoneId isEqualToString:_credentials.zoneId]) return;
+    if(_credentials.zoneId && ![zoneId isEqualToString:_credentials.zoneId]) {
+        return;
+    }
     
     [self.delegate rewardedVideoWillAppearForCustomEvent:self];
     [self.delegate rewardedVideoDidAppearForCustomEvent:self];
 }
 
 -(void)maioDidCloseAd:(NSString *)zoneId {
-    if(zoneId && ![zoneId isEqualToString:_credentials.zoneId]) return;
+    if(_credentials.zoneId && ![zoneId isEqualToString:_credentials.zoneId]) {
+        return;
+    }
     
     [self.delegate rewardedVideoWillDisappearForCustomEvent:self];
     [self.delegate rewardedVideoDidDisappearForCustomEvent:self];
 }
 
 -(void)maioDidFinishAd:(NSString *)zoneId playtime:(NSInteger)playtime skipped:(BOOL)skipped rewardParam:(NSString *)rewardParam {
-    if(zoneId && ![zoneId isEqualToString:_credentials.zoneId]) return;
+    if(_credentials.zoneId && ![zoneId isEqualToString:_credentials.zoneId]) {
+        return;
+    }
     
     [self.delegate rewardedVideoShouldRewardUserForCustomEvent:self reward:nil];
+}
+
+-(void)maioDidFail:(NSString *)zoneId reason:(MaioFailReason)reason {
+    if(_credentials.zoneId && ![zoneId isEqualToString:_credentials.zoneId]) {
+        return;
+    }
+    
+    [self.delegate rewardedVideoDidFailToPlayForCustomEvent:self error:[MaioError loadFailedWithReason:reason]];
 }
 
 @end

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1476DDF22071F46000D0414A /* MaioError.m in Sources */ = {isa = PBXBuildFile; fileRef = 1476DDF12071F46000D0414A /* MaioError.m */; };
 		147F28A520299A5400E1FECA /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 147F28A420299A5400E1FECA /* AppDelegate.m */; };
 		147F28A820299A5400E1FECA /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 147F28A720299A5400E1FECA /* ViewController.m */; };
 		147F28AB20299A5400E1FECA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 147F28A920299A5400E1FECA /* Main.storyboard */; };
@@ -228,6 +229,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1476DDF02071F46000D0414A /* MaioError.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MaioError.h; sourceTree = "<group>"; };
+		1476DDF12071F46000D0414A /* MaioError.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MaioError.m; sourceTree = "<group>"; };
 		147F28A020299A5400E1FECA /* mopub.ObjectiveC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = mopub.ObjectiveC.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		147F28A320299A5400E1FECA /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		147F28A420299A5400E1FECA /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -1297,6 +1300,8 @@
 				147F2DE4202ADDA200E1FECA /* MaioRewardedVideo.m */,
 				147F2DE6202AF05200E1FECA /* MaioManager.h */,
 				147F2DE7202AF05200E1FECA /* MaioManager.m */,
+				1476DDF02071F46000D0414A /* MaioError.h */,
+				1476DDF12071F46000D0414A /* MaioError.m */,
 			);
 			path = MaioMoPubAdapter;
 			sourceTree = "<group>";
@@ -1529,6 +1534,7 @@
 				147F2D83202AB80400E1FECA /* MPCollectionViewAdPlacerCell.m in Sources */,
 				147F2D75202AB80400E1FECA /* MPVASTModel.m in Sources */,
 				147F2DA4202AB80400E1FECA /* MPStreamAdPlacementData.m in Sources */,
+				1476DDF22071F46000D0414A /* MaioError.m in Sources */,
 				147F2DCC202AB80400E1FECA /* MPRewardedVideoAdManager.m in Sources */,
 				147F2D1E202AB80400E1FECA /* MPActivityViewControllerHelper+TweetShare.m in Sources */,
 				147F2D32202AB80400E1FECA /* MPXMLParser.m in Sources */,

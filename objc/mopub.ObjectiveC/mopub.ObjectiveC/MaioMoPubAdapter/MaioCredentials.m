@@ -27,27 +27,15 @@ static NSString *const kMaioZoneId  = @"zoneId";
         MPLogError(@"MaioInterstitial: Media Id is empty.");
         return nil;
     }
-    if(![self isValidMaioId:mediaId]) {
+    if(!mediaId) {
         MPLogError(@"MaioInterstitial: Invalid mediaId: %@", mediaId);
         return nil;
     }
     
     // zoneId validations
-    NSString *zoneId    = [dictionary objectForKey:kMaioZoneId];
-    if(zoneId && ![self isValidMaioId:zoneId]) {
-        MPLogError(@"MaioInterstitial: Invalid zoneId: %@", zoneId);
-        return nil;
-    }
-    
-    return [[MaioCredentials alloc] initWithMediaId:mediaId zoneId:zoneId];
-}
+    NSString *zoneId = [dictionary objectForKey:kMaioZoneId];
 
-+(BOOL)isValidMaioId:(NSString *)uuidString {
-    if(!uuidString) return NO;
-    
-    if([uuidString hasPrefix:@"Demo"]) return YES;
-    NSUUID *uuid = [[NSUUID alloc] initWithUUIDString:uuidString];
-    return !!uuid;
+    return [[MaioCredentials alloc] initWithMediaId:mediaId zoneId:zoneId];
 }
 
 -(instancetype)initWithMediaId:(NSString *)mediaId zoneId:(NSString *)zoneId {
