@@ -13,7 +13,7 @@
 
 @implementation MaioInterstitial {
     MaioCredentials *_credentials;
-    BOOL _isLoadRequested;
+    BOOL _isAdRequested;
 }
 
 - (void)requestInterstitialWithCustomEventInfo:(NSDictionary *)info {
@@ -28,13 +28,14 @@
     
     if([manager isInitialized:_credentials.mediaId] == NO) {
         [manager startWithMediaId:_credentials.mediaId delegate:self];
+        _isAdRequested = YES;
         return;
     }
     
     if([manager canShowAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId]) {
         [self.delegate interstitialCustomEvent:self didLoadAd:self];
     } else {
-        _isLoadRequested = YES;
+        _isAdRequested = YES;
     }
     
 }
@@ -49,10 +50,10 @@
 #pragma mark - MaioDelegate
 
 -(void)maioDidChangeCanShow:(NSString *)zoneId newValue:(BOOL)newValue {
-    if(_isLoadRequested == NO) {
+    if(_isAdRequested == NO) {
         return;
     }
-    _isLoadRequested = NO;
+    _isAdRequested = NO;
     
     if(_credentials.zoneId && ![zoneId isEqualToString:_credentials.zoneId]) {
         return;

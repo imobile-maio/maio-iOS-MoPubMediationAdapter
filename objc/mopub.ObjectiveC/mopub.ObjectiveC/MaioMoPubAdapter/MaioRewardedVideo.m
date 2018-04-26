@@ -14,7 +14,7 @@
 
 @implementation MaioRewardedVideo {
     MaioCredentials *_credentials;
-    BOOL _isRequestedAd;
+    BOOL _isAdRequested;
 }
 
 -(void)initializeSdkWithParameters:(NSDictionary *)parameters
@@ -29,20 +29,20 @@
     MaioCredentials *credentials = [MaioCredentials credentialsFromDictionary:info];
     if(!credentials) {
         [self.delegate rewardedVideoDidFailToLoadAdForCustomEvent:self error:[MaioError credentials]];
+        return;
     }
     _credentials = credentials;
     
     if([manager isInitialized:credentials.mediaId] == NO) {
-        _isRequestedAd = YES;
+        _isAdRequested = YES;
         [self initializeMaioSdk];
         return;
     }
     
-    
     if([manager canShowAtMediaId:credentials.mediaId zoneId:credentials.zoneId]) {
         [self.delegate rewardedVideoDidLoadAdForCustomEvent:self];
     } else {
-        _isRequestedAd = YES;
+        _isAdRequested = YES;
     }
 }
 
@@ -68,14 +68,14 @@
 
 -(void)maioDidChangeCanShow:(NSString *)zoneId newValue:(BOOL)newValue
 {
+    if(_isAdRequested == NO) {
+        return;
+    }
+    _isAdRequested = NO;
+    
     if(_credentials.zoneId && ![zoneId isEqualToString:_credentials.zoneId]) {
         return;
     }
-    
-    if(_isRequestedAd == NO) {
-        return;
-    }
-    _isRequestedAd = NO;
     
     if(newValue)
     {
