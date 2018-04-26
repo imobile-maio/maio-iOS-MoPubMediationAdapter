@@ -37,5 +37,5 @@
 1. Install `maio iOS SDK` to your project.
     - If you use `Cocoapods`, you can just add `pod 'MaioSDK'` to your Podfile.
     - For detailed instructions, see [`GetStarted`](https://github.com/imobile-maio/maio-iOS-SDK/wiki/Get-Started-(EN))
-1. Go to the [release page](https://github.com/imobile-maio/maio-Adobe-AIR-Extension/releases) and download the newest `MaioMoPubAdapter_v*.*.*.zip`.
+1. Go to the [release page](https://github.com/imobile-maio/maio-iOS-MoPubMediationAdapter/releases) and download the newest `MaioMoPubAdapter_v*.*.*.zip`.
 1. Copy the contents of `MaioMoPubAdapter_v*.*.*.zip` to your project.
