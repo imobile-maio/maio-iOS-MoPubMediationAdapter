@@ -2,7 +2,6 @@
 //  MaioError.m
 //  mopub.ObjectiveC
 //
-//  Created by 土肥 一郎 on 2018/04/02.
 //  Copyright © 2018年 maio. All rights reserved.
 //
 
