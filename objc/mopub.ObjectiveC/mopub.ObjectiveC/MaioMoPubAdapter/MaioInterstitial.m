@@ -32,6 +32,10 @@
         return;
     }
     
+    if([manager hasDelegate:self forMediaId:_credentials.mediaId] == NO) {
+        [manager addDelegate:self forMediaId:_credentials.mediaId];
+    }
+    
     if([manager canShowAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId]) {
         [self.delegate interstitialCustomEvent:self didLoadAd:self];
     } else {
@@ -93,7 +97,7 @@
     }
     
     [self.delegate interstitialCustomEventWillAppear:self];
-    [self.delegate interstitialCustomEventDidDisappear:self];
+    [self.delegate interstitialCustomEventDidAppear:self];
 }
 
 -(void)maioDidFail:(NSString *)zoneId reason:(MaioFailReason)reason

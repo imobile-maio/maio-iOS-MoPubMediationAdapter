@@ -28,6 +28,10 @@
     [_delegates addObject:delegate];
 }
 
+-(BOOL) containsDelegate:(id<MaioDelegate>) delegate {
+    return [_delegates containsObject:delegate];
+}
+
 -(void)maioDidInitialize {
     for(id<MaioDelegate> delegate in _delegates) {
         if([delegate respondsToSelector:@selector(maioDidInitialize)]) {
@@ -69,7 +73,6 @@
 }
 
 -(void)maioDidChangeCanShow:(NSString *)zoneId newValue:(BOOL)newValue {
-    NSLog(@"change can show: %@ -> %d", zoneId, newValue);
     for(id<MaioDelegate> delegate in _delegates) {
         if([delegate respondsToSelector:@selector(maioDidChangeCanShow:newValue:)]) {
             [delegate maioDidChangeCanShow:zoneId newValue:newValue];
@@ -89,14 +92,14 @@
 
 @implementation MaioManager {
     NSMutableDictionary<NSString *, MaioInstance *> *_references;
-    NSMutableArray<MaioGeneralDelegate *> *_generalDelegateReferences;
+    NSMutableDictionary<NSString *, MaioGeneralDelegate *> *_generalDelegateReferences;
 }
 
 -(instancetype)init{
     self = [super init];
     if(self) {
         _references = [NSMutableDictionary dictionary];
-        _generalDelegateReferences = [NSMutableArray array];
+        _generalDelegateReferences = [NSMutableDictionary dictionary];
     }
     return self;
 }
@@ -112,38 +115,55 @@
 }
 
 -(void) startWithMediaId:(NSString *)mediaId delegate:(id<MaioDelegate>)delegate {
-    if([_references objectForKey:mediaId]) {
-        MaioInstance *maioInstance = [_references objectForKey:mediaId];
-        MaioGeneralDelegate *generalDelegate = (MaioGeneralDelegate *)[maioInstance delegate];
+    if(_references[mediaId]) {
+        MaioGeneralDelegate *generalDelegate = _generalDelegateReferences[mediaId];
         [generalDelegate addDelegate:delegate];
         return;
     }
     
     MaioGeneralDelegate *generalDelegate = [[MaioGeneralDelegate alloc] initWithDelegate:delegate];
-    [_generalDelegateReferences addObject:generalDelegate];
+    _generalDelegateReferences[mediaId] = generalDelegate;
     MaioInstance *maioInstance = [Maio startWithNonDefaultMediaId:mediaId delegate:generalDelegate];
-    [_references setObject:maioInstance forKey:mediaId];
+    _references[mediaId] = maioInstance;
 }
 
 -(BOOL) isInitialized:(NSString *)mediaId {
-    return !![_references objectForKey:mediaId];
+    return _references[mediaId] != nil;
 }
 
--(BOOL) canShowAtMediaId:(NSString *)mediaId zoneId:(NSString *)zoneId {
-    if(![_references objectForKey:mediaId]) {
+-(void) addDelegate:(id<MaioDelegate>)delegate forMediaId:(NSString *)mediaId {
+    if(!_references[mediaId]) {
+        return;
+    }
+    
+    MaioGeneralDelegate *generalDelegate = _generalDelegateReferences[mediaId];
+    [generalDelegate addDelegate:delegate];
+}
+
+- (BOOL)hasDelegate:(id <MaioDelegate>)delegate forMediaId:(NSString *)mediaId {
+    if(!_references[mediaId]) {
         return NO;
     }
     
-    MaioInstance *instance = [_references objectForKey:mediaId];
+    MaioGeneralDelegate *generalDelegate = _generalDelegateReferences[mediaId];
+    return [generalDelegate containsDelegate:delegate];
+}
+
+-(BOOL) canShowAtMediaId:(NSString *)mediaId zoneId:(NSString *)zoneId {
+    if(!_references[mediaId]) {
+        return NO;
+    }
+    
+    MaioInstance *instance = _references[mediaId];
     return [instance canShowAtZoneId:zoneId];
 }
 
 -(void) showAtMediaId:(NSString *)mediaId zoneId:(NSString *)zoneId {
-    if(![_references objectForKey:mediaId]) {
+    if(!_references[mediaId]) {
         return;
     }
     
-    MaioInstance *instance = [_references objectForKey:mediaId];
+    MaioInstance *instance = _references[mediaId];
     [instance showAtZoneId:zoneId];
 }
 

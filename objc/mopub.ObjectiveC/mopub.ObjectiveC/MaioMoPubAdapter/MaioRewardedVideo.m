@@ -11,6 +11,7 @@
 #import "MaioCredentials.h"
 #import "MaioManager.h"
 #import "MaioError.h"
+#import "MPRewardedVideoReward.h"
 
 @implementation MaioRewardedVideo {
     MaioCredentials *_credentials;
@@ -37,6 +38,10 @@
         _isAdRequested = YES;
         [self initializeMaioSdk];
         return;
+    }
+    
+    if([manager hasDelegate:self forMediaId:_credentials.mediaId] == NO) {
+        [manager addDelegate:self forMediaId:_credentials.mediaId];
     }
     
     if([manager canShowAtMediaId:credentials.mediaId zoneId:credentials.zoneId]) {
@@ -66,16 +71,15 @@
 
 #pragma mark - MaioDelegate
 
--(void)maioDidChangeCanShow:(NSString *)zoneId newValue:(BOOL)newValue
-{
+-(void)maioDidChangeCanShow:(NSString *)zoneId newValue:(BOOL)newValue {
+    if(_credentials.zoneId && ![zoneId isEqualToString:_credentials.zoneId]) {
+        return;
+    }
+    
     if(_isAdRequested == NO) {
         return;
     }
     _isAdRequested = NO;
-    
-    if(_credentials.zoneId && ![zoneId isEqualToString:_credentials.zoneId]) {
-        return;
-    }
     
     if(newValue)
     {
@@ -115,7 +119,9 @@
         return;
     }
     
-    [self.delegate rewardedVideoShouldRewardUserForCustomEvent:self reward:nil];
+    
+    MPRewardedVideoReward *reward = [[MPRewardedVideoReward alloc] initWithCurrencyAmount: [NSNumber numberWithInt:[rewardParam intValue]]];
+    [self.delegate rewardedVideoShouldRewardUserForCustomEvent:self reward:reward];
 }
 
 -(void)maioDidFail:(NSString *)zoneId reason:(MaioFailReason)reason {
