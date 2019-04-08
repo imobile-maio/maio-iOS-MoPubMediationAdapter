@@ -1,8 +1,9 @@
 //
 //  MPCountdownTimerView.h
-//  MoPubSDK
 //
-//  Copyright © 2016 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import <UIKit/UIKit.h>
@@ -40,7 +41,7 @@
 - (void)startWithTimerCompletion:(void(^)(BOOL hasElapsed))completion;
 
 /**
- * Stops the timer and optionally invokes the completion block from `startWithTimerCompletion:`.
+ * Stops the timer and optionally invokes the completion block from `startWithTimerCompletion:`. 
  * If the timer hasn't started, calling this method will do nothing.
  */
 - (void)stopAndSignalCompletion:(BOOL)shouldSignalCompletion;

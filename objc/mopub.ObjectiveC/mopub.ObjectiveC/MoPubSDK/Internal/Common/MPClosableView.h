@@ -1,11 +1,14 @@
 //
 //  MPClosableView.h
-//  MoPubSDK
 //
-//  Copyright (c) 2014 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import <UIKit/UIKit.h>
+
+@class MPWebView;
 
 enum {
     MPClosableViewCloseButtonLocationTopRight,
@@ -33,7 +36,7 @@ CGRect MPClosableViewCustomCloseButtonFrame(CGSize size, MPClosableViewCloseButt
  * `MPClosableView` is composed of a content view and a close button. The close button can
  * be positioned at any corner, the center of top and bottom edges, and the center of the view.
  * The close button can either be a button that is tappable with image, tappable without an image,
- * and completely disabled altogether. Finally, `MPClosableView` keeps track as to whether or not
+ * and completely disabled altogether. Finally, `MPClosableView` keeps track as to whether or not 
  * it has been tapped.
  */
 @interface MPClosableView : UIView
@@ -44,7 +47,9 @@ CGRect MPClosableViewCustomCloseButtonFrame(CGSize size, MPClosableViewCloseButt
 @property (nonatomic, readonly) BOOL wasTapped;
 @property (nonatomic, strong, readonly) UIButton *closeButton;
 
-- (instancetype)initWithFrame:(CGRect)frame closeButtonType:(MPClosableViewCloseButtonType)closeButtonType;
+- (instancetype)initWithFrame:(CGRect)frame
+                      webView:(MPWebView *)webView
+                     delegate:(id<MPClosableViewDelegate>)delegate;
 
 @end
 

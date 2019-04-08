@@ -1,22 +1,23 @@
 //
 //  MPWebView.h
-//  MoPubSDK
 //
-//  Copyright © 2016 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 /***
  * MPWebView
- * This class is a wrapper class for WKWebView and UIWebView. Internally, it utilizes WKWebView when possible, and
+ * This class is a wrapper class for WKWebView and UIWebView. Internally, it utilizes WKWebView when possible, and 
  * falls back on UIWebView only when WKWebView isn't available (i.e., in iOS 7). MPWebView's interface is meant to
  * imitate UIWebView, and, in many cases, MPWebView can act as a drop-in replacement for UIWebView. MPWebView also
  * blocks all JavaScript text boxes from appearing.
  *
- * While `stringByEvaluatingJavaScriptFromString:` does exist for UIWebView compatibility reasons, it's highly
+ * While `stringByEvaluatingJavaScriptFromString:` does exist for UIWebView compatibility reasons, it's highly 
  * recommended that the caller uses `evaluateJavaScript:completionHandler:` whenever code can be reworked
  * to make use of completion blocks to keep the advantages of asynchronicity. It solely fires off the javascript
  * execution within WKWebView and does not wait or return.
- *
+ * 
  * MPWebView currently does not support a few other features of UIWebView -- such as pagination -- as WKWebView also
  * does not contain support.
  ***/
@@ -52,6 +53,16 @@ typedef void (^MPWebViewJavascriptEvaluationCompletionHandler)(id result, NSErro
 - (instancetype)initWithFrame:(CGRect)frame forceUIWebView:(BOOL)forceUIWebView;
 
 @property (weak, nonatomic) id<MPWebViewDelegate> delegate;
+
+// When set to `YES`, `shouldConformToSafeArea` sets constraints on the WKWebView to always stay within the safe area
+// using the MPWebView's safeAreaLayoutGuide. Otherwise, the WKWebView will be constrained directly to MPWebView's
+// anchors to fill the whole container. Default is `NO`.
+//
+// This property has no effect on versions of iOS less than 11 or phones other than iPhone X.
+//
+// This property has no effect on UIWebView-based MPWebViews, as UIWebView only supports springs and struts, however
+// this should not be an issue because UIWebView doesn't seem to be glitchy with the safe area.
+@property (nonatomic, assign) BOOL shouldConformToSafeArea;
 
 @property (nonatomic, readonly, getter=isLoading) BOOL loading;
 

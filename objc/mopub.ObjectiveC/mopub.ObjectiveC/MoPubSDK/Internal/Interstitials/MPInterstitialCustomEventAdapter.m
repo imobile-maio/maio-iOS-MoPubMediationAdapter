@@ -1,19 +1,22 @@
 //
 //  MPInterstitialCustomEventAdapter.m
-//  MoPub
 //
-//  Copyright (c) 2012 MoPub, Inc. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPInterstitialCustomEventAdapter.h"
 
-#import "MPConstants.h"
 #import "MPAdConfiguration.h"
+#import "MPAdTargeting.h"
+#import "MPConstants.h"
+#import "MPCoreInstanceProvider.h"
+#import "MPError.h"
+#import "MPHTMLInterstitialCustomEvent.h"
 #import "MPLogging.h"
-#import "MPInstanceProvider.h"
 #import "MPInterstitialCustomEvent.h"
 #import "MPInterstitialAdController.h"
-#import "MPHTMLInterstitialCustomEvent.h"
 #import "MPMRAIDInterstitialCustomEvent.h"
 #import "MPRealTimeTimer.h"
 
@@ -41,24 +44,29 @@
         [self.interstitialCustomEvent performSelector:@selector(invalidate)];
     }
     self.interstitialCustomEvent.delegate = nil;
-
+    
     // make sure the custom event isn't released synchronously as objects owned by the custom event
     // may do additional work after a callback that results in dealloc being called
     [[MPCoreInstanceProvider sharedProvider] keepObjectAliveForCurrentRunLoopIteration:_interstitialCustomEvent];
 }
 
-- (void)getAdWithConfiguration:(MPAdConfiguration *)configuration
+- (void)getAdWithConfiguration:(MPAdConfiguration *)configuration targeting:(MPAdTargeting *)targeting
 {
     MPLogInfo(@"Looking for custom event class named %@.", configuration.customEventClass);
     self.configuration = configuration;
-
-    self.interstitialCustomEvent = [[MPInstanceProvider sharedProvider] buildInterstitialCustomEventFromCustomClass:configuration.customEventClass delegate:self];
-
-    if (self.interstitialCustomEvent) {
-        [self.interstitialCustomEvent requestInterstitialWithCustomEventInfo:configuration.customEventClassData];
-    } else {
-        [self.delegate adapter:self didFailToLoadAdWithError:nil];
+    
+    MPInterstitialCustomEvent *customEvent = [[configuration.customEventClass alloc] init];
+    if (![customEvent isKindOfClass:[MPInterstitialCustomEvent class]]) {
+        NSError * error = [NSError customEventClass:configuration.customEventClass doesNotInheritFrom:MPInterstitialCustomEvent.class];
+        MPLogEvent([MPLogEvent error:error message:nil]);
+        [self.delegate adapter:self didFailToLoadAdWithError:error];
+        return;
     }
+    customEvent.delegate = self;
+    customEvent.localExtras = targeting.localExtras;
+    self.interstitialCustomEvent = customEvent;
+    
+    [self.interstitialCustomEvent requestInterstitialWithCustomEventInfo:configuration.customEventClassData adMarkup:configuration.advancedBidPayload];
 }
 
 - (void)showInterstitialFromViewController:(UIViewController *)controller
@@ -88,7 +96,7 @@
 {
     [self didStopLoading];
     [self.delegate adapterDidFinishLoadingAd:self];
-
+    
     // Check for MoPub-specific custom events before setting the timer
     if ([customEvent isKindOfClass:[MPHTMLInterstitialCustomEvent class]]
         || [customEvent isKindOfClass:[MPMRAIDInterstitialCustomEvent class]]) {
@@ -146,7 +154,7 @@
         self.hasTrackedClick = YES;
         [self trackClick];
     }
-
+    
     [self.delegate interstitialDidReceiveTapEventForAdapter:self];
 }
 

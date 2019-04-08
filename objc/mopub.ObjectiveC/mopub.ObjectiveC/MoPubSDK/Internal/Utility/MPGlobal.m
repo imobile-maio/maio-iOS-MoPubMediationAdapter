@@ -1,8 +1,9 @@
 //
 //  MPGlobal.m
-//  MoPub
 //
-//  Copyright 2011 MoPub, Inc. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPGlobal.h"
@@ -39,10 +40,23 @@ CGFloat MPStatusBarHeight() {
     return (width < height) ? width : height;
 }
 
-CGRect MPApplicationFrame()
+CGRect MPApplicationFrame(BOOL includeSafeAreaInsets)
 {
     CGRect frame = MPScreenBounds();
 
+    if (@available(iOS 11.0, *)) {
+        if (includeSafeAreaInsets) {
+            // Safe area insets include the status bar offset.
+            UIEdgeInsets safeInsets = UIApplication.sharedApplication.keyWindow.safeAreaInsets;
+            frame.origin.x = safeInsets.left;
+            frame.size.width -= (safeInsets.left + safeInsets.right);
+            frame.origin.y = safeInsets.top;
+            frame.size.height -= (safeInsets.top + safeInsets.bottom);
+            
+            return frame;
+        }
+    }
+   
     frame.origin.y += MPStatusBarHeight();
     frame.size.height -= MPStatusBarHeight();
 
@@ -59,7 +73,7 @@ CGRect MPScreenBounds()
     if ([[UIScreen mainScreen] respondsToSelector:@selector(fixedCoordinateSpace)]) {
         bounds = [UIScreen mainScreen].fixedCoordinateSpace.bounds;
     }
-
+    
     // Rotate the portrait-up bounds if the orientation of the device is in landscape.
     if (UIInterfaceOrientationIsLandscape(MPInterfaceOrientation())) {
         CGFloat width = bounds.size.width;
@@ -158,7 +172,7 @@ BOOL MPViewIntersectsParentWindow(UIView *view)
     if (parentWindow == nil) {
         return NO;
     }
-
+    
     // We need to call convertRect:toView: on this view's superview rather than on this view itself.
     CGRect viewFrameInWindowCoordinates = [view.superview convertRect:view.frame toView:parentWindow];
 
@@ -168,18 +182,18 @@ BOOL MPViewIntersectsParentWindow(UIView *view)
 BOOL MPViewIntersectsParentWindowWithPercent(UIView *view, CGFloat percentVisible)
 {
     UIWindow *parentWindow = MPViewGetParentWindow(view);
-
+    
     if (parentWindow == nil) {
         return NO;
     }
-
+    
     // We need to call convertRect:toView: on this view's superview rather than on this view itself.
     CGRect viewFrameInWindowCoordinates = [view.superview convertRect:view.frame toView:parentWindow];
     CGRect intersection = CGRectIntersection(viewFrameInWindowCoordinates, parentWindow.frame);
-
+    
     CGFloat intersectionArea = CGRectGetWidth(intersection) * CGRectGetHeight(intersection);
     CGFloat originalArea = CGRectGetWidth(view.bounds) * CGRectGetHeight(view.bounds);
-
+    
     return intersectionArea >= (originalArea * percentVisible);
 }
 
@@ -220,6 +234,15 @@ NSArray *MPConvertStringArrayToURLArray(NSArray *strArray)
     }
 
     return urls;
+}
+
+UIInterfaceOrientationMask MPInterstitialOrientationTypeToUIInterfaceOrientationMask(MPInterstitialOrientationType type)
+{
+    switch (type) {
+        case MPInterstitialOrientationTypePortrait: return UIInterfaceOrientationMaskPortrait;
+        case MPInterstitialOrientationTypeLandscape: return UIInterfaceOrientationMaskLandscape;
+        default: return UIInterfaceOrientationMaskAll;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -303,7 +326,7 @@ NSArray *MPConvertStringArrayToURLArray(NSArray *strArray)
     if (supportsPortraitUpsideDown && orientation == UIInterfaceOrientationPortraitUpsideDown) {
         return YES;
     }
-
+    
     return NO;
 }
 
@@ -324,7 +347,7 @@ NSArray *MPConvertStringArrayToURLArray(NSArray *strArray)
 {
     if (![url mp_hasTelephoneScheme] && ![url mp_hasTelephonePromptScheme]) {
         // Shouldn't be here as the url must have a tel or telPrompt scheme.
-        MPLogError(@"Processing URL as a telephone URL when %@ doesn't follow the tel:// or telprompt:// schemes", url.absoluteString);
+        MPLogInfo(@"Processing URL as a telephone URL when %@ doesn't follow the tel:// or telprompt:// schemes", url.absoluteString);
         return nil;
     }
 
@@ -335,7 +358,7 @@ NSArray *MPConvertStringArrayToURLArray(NSArray *strArray)
         if (!phoneNumber) {
             phoneNumber = [url resourceSpecifier];
             if ([phoneNumber length] == 0) {
-                MPLogError(@"Invalid telelphone URL: %@.", url.absoluteString);
+                MPLogInfo(@"Invalid telelphone URL: %@.", url.absoluteString);
                 return nil;
             }
         }

@@ -1,8 +1,9 @@
 //
 //  MPRealTimeTimer.m
-//  MoPubSampleApp
 //
-//  Copyright © 2017 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPRealTimeTimer.h"
@@ -28,7 +29,7 @@
         _interval = interval;
         _block = block;
     }
-
+    
     return self;
 }
 
@@ -44,7 +45,7 @@
 - (void)invalidate {
     [self.timer invalidate];
     self.timer = nil;
-
+    
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     self.isScheduled = NO;
     self.fireDate = nil;
@@ -87,7 +88,7 @@
         [self fire];
         return;
     }
-
+    
     // update time interval and schedule a new timer if it's not yet time to fire
     self.currentTimeInterval = [self.fireDate timeIntervalSinceNow];
     [self setTimerWithCurrentTimeInterval];

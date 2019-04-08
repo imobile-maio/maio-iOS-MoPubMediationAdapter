@@ -1,8 +1,9 @@
 //
 //  MRExpandModalViewController.h
-//  MoPubSDK
 //
-//  Copyright (c) 2014 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import <UIKit/UIKit.h>
@@ -33,7 +34,7 @@
 
 /**
  * This will set the visibility of the status bar based on whether or not the status bar was hidden when hideStatusBar was called.
- * A call to this method should be matched with a call to hideStatusBar.  That is, each call to restoreStatusBarVisibility should
+ * A call to this method should be matched with a call to hideStatusBar.  That is, each call to restoreStatusBarVisibility should 
  * be preceded by a call to hideStatusBar. Calling this method consecutively will not affect the status bar beyond the first call.
  */
 - (void)restoreStatusBarVisibility;

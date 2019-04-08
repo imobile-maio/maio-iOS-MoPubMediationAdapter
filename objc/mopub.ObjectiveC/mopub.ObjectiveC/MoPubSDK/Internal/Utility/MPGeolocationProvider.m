@@ -1,8 +1,9 @@
 //
 //  MPGeolocationProvider.m
-//  MoPub
 //
-//  Copyright (c) 2014 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPGeolocationProvider.h"
@@ -11,6 +12,8 @@
 #import "MPIdentityProvider.h"
 #import "MPLogging.h"
 #import "MPTimer.h"
+#import "MPConsentManager.h"
+#import "MPConsentChangedNotification.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -35,6 +38,8 @@ const NSTimeInterval kMPLocationUpdateInterval = 10.0 * 60.0;
 @property (nonatomic) NSDate *timeOfLastLocationUpdate;
 @property (nonatomic) MPTimer *nextLocationUpdateTimer;
 @property (nonatomic) MPTimer *locationUpdateDurationTimer;
+// Raw locationUpdatesEnabled value set by publisher
+@property (nonatomic) BOOL rawLocationUpdatesEnabled;
 
 @end
 
@@ -56,12 +61,12 @@ const NSTimeInterval kMPLocationUpdateInterval = 10.0 * 60.0;
 {
     self = [super init];
     if (self) {
-        _locationUpdatesEnabled = YES;
-
+        _rawLocationUpdatesEnabled = YES;
+        
         _locationManager = [[MPCoreInstanceProvider sharedProvider] buildCLLocationManager];
         _locationManager.delegate = self;
         _locationManager.distanceFilter = kMPCityBlockDistanceFilter;
-
+        
         // CLLocationManager's `location` property may already contain location data upon
         // initialization (for example, if the application uses significant location updates).
         CLLocation *existingLocation = _locationManager.location;
@@ -69,20 +74,25 @@ const NSTimeInterval kMPLocationUpdateInterval = 10.0 * 60.0;
             _lastKnownLocation = existingLocation;
             MPLogDebug(@"Found previous location information.");
         }
-
+        
         // Avoid processing location updates when the application enters the background.
         [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidEnterBackgroundNotification object:[UIApplication sharedApplication] queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
             [self stopAllCurrentOrScheduledLocationUpdates];
         }];
-
+        
         // Re-activate location updates when the application comes back to the foreground.
         [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationWillEnterForegroundNotification object:[UIApplication sharedApplication] queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
-            if (_locationUpdatesEnabled) {
+            if (self.locationUpdatesEnabled) {
                 [self resumeLocationUpdatesAfterBackgrounding];
             }
         }];
 
-        [self startRecurringLocationUpdates];
+        if ([MPConsentManager sharedManager].canCollectPersonalInfo) {
+            [self startRecurringLocationUpdates];
+        }
+
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(consentStateChanged:) name:kMPConsentChangedNotification object:nil];
+
     }
     return self;
 }
@@ -100,15 +110,24 @@ const NSTimeInterval kMPLocationUpdateInterval = 10.0 * 60.0;
     if (!self.locationUpdatesEnabled) {
         return nil;
     }
-
+    
     return _lastKnownLocation;
+}
+
+- (BOOL)locationUpdatesEnabled
+{
+    return self.rawLocationUpdatesEnabled && [MPConsentManager sharedManager].canCollectPersonalInfo;
 }
 
 - (void)setLocationUpdatesEnabled:(BOOL)enabled
 {
-    _locationUpdatesEnabled = enabled;
+    self.rawLocationUpdatesEnabled = enabled;
+    [self startOrStopLocationUpdates];
+}
 
-    if (!_locationUpdatesEnabled) {
+- (void)startOrStopLocationUpdates
+{
+    if (!self.locationUpdatesEnabled) {
         [self stopAllCurrentOrScheduledLocationUpdates];
         self.lastKnownLocation = nil;
     } else if (![self.locationUpdateDurationTimer isValid] && ![self.nextLocationUpdateTimer isValid]) {
@@ -121,7 +140,7 @@ const NSTimeInterval kMPLocationUpdateInterval = 10.0 * 60.0;
 - (void)setAuthorizedForLocationServices:(BOOL)authorizedForLocationServices
 {
     _authorizedForLocationServices = authorizedForLocationServices;
-
+    
     if (_authorizedForLocationServices && [CLLocationManager locationServicesEnabled]) {
         [self startRecurringLocationUpdates];
     } else {
@@ -146,20 +165,20 @@ const NSTimeInterval kMPLocationUpdateInterval = 10.0 * 60.0;
 - (void)startRecurringLocationUpdates
 {
     self.timeOfLastLocationUpdate = [NSDate date];
-
+    
     if (![CLLocationManager locationServicesEnabled] || ![self isAuthorizedStatus:[CLLocationManager authorizationStatus]]) {
         MPLogDebug(@"Will not start location updates: the application is not authorized "
                    @"for location services.");
         return;
     }
-
-    if (!_locationUpdatesEnabled) {
+    
+    if (!self.locationUpdatesEnabled) {
         MPLogDebug(@"Will not start location updates because they have been disabled.");
         return;
     }
-
+    
     [self.locationManager startUpdatingLocation];
-
+    
     [self.locationUpdateDurationTimer invalidate];
     self.locationUpdateDurationTimer = [[MPCoreInstanceProvider sharedProvider] buildMPTimerWithTimeInterval:kMPLocationUpdateDuration target:self selector:@selector(currentLocationUpdateDidFinish) repeats:NO];
     [self.locationUpdateDurationTimer scheduleNow];
@@ -170,7 +189,7 @@ const NSTimeInterval kMPLocationUpdateInterval = 10.0 * 60.0;
     MPLogDebug(@"Stopping the current location update session and scheduling the next session.");
     [self.locationUpdateDurationTimer invalidate];
     [self.locationManager stopUpdatingLocation];
-
+    
     [self scheduleNextLocationUpdateAfterDelay:kMPLocationUpdateInterval];
 }
 
@@ -187,14 +206,14 @@ const NSTimeInterval kMPLocationUpdateInterval = 10.0 * 60.0;
     MPLogDebug(@"Stopping any scheduled location updates.");
     [self.locationUpdateDurationTimer invalidate];
     [self.locationManager stopUpdatingLocation];
-
+    
     [self.nextLocationUpdateTimer invalidate];
 }
 
 - (void)resumeLocationUpdatesAfterBackgrounding
 {
     NSTimeInterval timeSinceLastUpdate = [[NSDate date] timeIntervalSinceDate:self.timeOfLastLocationUpdate];
-
+    
     if (timeSinceLastUpdate >= kMPLocationUpdateInterval) {
         MPLogDebug(@"Last known user location is stale. Updating location.");
         [self startRecurringLocationUpdates];
@@ -213,16 +232,16 @@ const NSTimeInterval kMPLocationUpdateInterval = 10.0 * 60.0;
     if (!otherLocation) {
         return YES;
     }
-
+    
     // Nil locations and locations with invalid horizontal accuracy are worse than any location.
     if (![self locationHasValidCoordinates:location]) {
         return NO;
     }
-
+    
     if ([self isLocation:location olderThanLocation:otherLocation]) {
         return NO;
     }
-
+    
     return YES;
 }
 
@@ -241,7 +260,7 @@ const NSTimeInterval kMPLocationUpdateInterval = 10.0 * 60.0;
 - (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status
 {
     MPLogDebug(@"Location authorization status changed to: %ld", (long)status);
-
+    
     switch (status) {
         case kCLAuthorizationStatusNotDetermined:
         case kCLAuthorizationStatusDenied:
@@ -278,14 +297,11 @@ const NSTimeInterval kMPLocationUpdateInterval = 10.0 * 60.0;
     }
 }
 
-#pragma mark - <CLLocationManagerDelegate> (iOS < 6.0)
+#pragma mark - Consent
 
-- (void)locationManager:(CLLocationManager *)manager didUpdateToLocation:(CLLocation *)newLocation fromLocation:(CLLocation *)oldLocation
+- (void)consentStateChanged:(NSNotification *)notification
 {
-    if ([self isLocation:newLocation betterThanLocation:self.lastKnownLocation]) {
-        self.lastKnownLocation = newLocation;
-        MPLogDebug(@"Updated last known user location.");
-    }
+    [self startOrStopLocationUpdates];
 }
 
 @end

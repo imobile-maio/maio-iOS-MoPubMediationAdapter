@@ -1,16 +1,18 @@
 //
 //  MPViewabilityTracker.h
-//  MoPubSDK
 //
-//  Copyright © 2016 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import <UIKit/UIKit.h>
+#import "MPViewabilityOption.h"
 
 @class MPWebView;
 
 /**
- * Notification that is fired when at least one viewability vendor is disabled.
+ * Notification that is fired when at least one viewability vendor is disabled. 
  */
 extern NSString *const kDisableViewabilityTrackerNotification;
 
@@ -19,18 +21,6 @@ extern NSString *const kDisableViewabilityTrackerNotification;
  * `kDisableViewabilityTrackerNotification`.
  */
 extern NSString *const kDisabledViewabilityTrackers;
-
-/**
- * Available viewability options
- * @remark Any changes made to this bitmask should also be reflected in `MPViewabilityTracker`
- * `+ (void)initialize` method.
- */
-typedef NS_OPTIONS(NSInteger, MPViewabilityOption) {
-    MPViewabilityOptionNone = 0,
-    MPViewabilityOptionIAS  = 1 << 0,
-    MPViewabilityOptionMoat = 1 << 1,
-    MPViewabilityOptionAll  = ((MPViewabilityOptionMoat << 1) - 1)
-};
 
 /**
  * Provides viewability tracking of an ad view.
@@ -44,7 +34,7 @@ typedef NS_OPTIONS(NSInteger, MPViewabilityOption) {
  */
 + (MPViewabilityOption)enabledViewabilityVendors;
 
-/**
+/** 
  * Disables viewability tracking for the specified vendors for the duration of the session.
  * @remark Viewability cannot be re-enabled for a vendor once it has been disabled.
  * @param vendors Vendors to stop viewability tracking

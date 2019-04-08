@@ -1,8 +1,9 @@
 //
 //  MPAdDestinationDisplayAgent.h
-//  MoPub
 //
-//  Copyright (c) 2013 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import <Foundation/Foundation.h>
@@ -11,12 +12,7 @@
 #import "MPProgressOverlayView.h"
 #import "MPAdBrowserController.h"
 #import "MPStoreKitProvider.h"
-
-typedef NS_ENUM(NSInteger, MOPUBDisplayAgentType) {
-    MOPUBDisplayAgentTypeInApp = 0,
-    MOPUBDisplayAgentTypeNativeSafari,
-    MOPUBDisplayAgentTypeSafariViewController
-};
+#import "MOPUBDisplayAgentType.h"
 
 @protocol MPAdDestinationDisplayAgentDelegate;
 

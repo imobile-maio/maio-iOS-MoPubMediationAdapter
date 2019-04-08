@@ -1,9 +1,9 @@
 //
 //  MPProgressOverlayView.m
-//  MoPub
 //
-//  Created by Andrew He on 7/18/12.
-//  Copyright 2012 MoPub, Inc. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPProgressOverlayView.h"
@@ -157,7 +157,7 @@ static void exponentialDecayInterpolation(void *info, const CGFloat *input, CGFl
 
     self.closeButton.hidden = YES;
     self.closeButton.alpha = 0.0f;
-
+    
     if (MP_ANIMATED) {
         [UIView animateWithDuration:0.2 animations:^{
             self.alpha = 0.0;
