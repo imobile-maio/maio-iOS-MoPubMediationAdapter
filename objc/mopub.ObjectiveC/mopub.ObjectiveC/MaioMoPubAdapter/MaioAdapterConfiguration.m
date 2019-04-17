@@ -29,4 +29,10 @@ static NSString* const kMaioAdapterVersion = @"1.4.5.0";
     return [Maio sdkVersion];
 }
 
+- (void)initializeNetworkWithConfiguration:(NSDictionary<NSString *,id> *)configuration complete:(void (^)(NSError * _Nullable))complete {
+    if (complete) {
+        complete(nil);
+    }
+}
+
 @end
