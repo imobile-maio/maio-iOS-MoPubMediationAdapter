@@ -16,4 +16,8 @@ static NSString* const kMaioAdapterVersion = @"1.4.5.0";
     return kMaioAdapterVersion;
 }
 
+- (NSString *)biddingToken {
+    return nil;
+}
+
 @end

@@ -11,5 +11,6 @@
 @interface MaioAdapterConfiguration : MPBaseAdapterConfiguration
 
 @property (nonatomic, copy, readonly) NSString * adapterVersion;
+@property (nonatomic, copy, readonly) NSString * biddingToken;
 
 @end
