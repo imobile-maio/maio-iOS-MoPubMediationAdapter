@@ -10,4 +10,6 @@
 
 @interface MaioAdapterConfiguration : MPBaseAdapterConfiguration
 
+@property (nonatomic, copy, readonly) NSString * adapterVersion;
+
 @end
