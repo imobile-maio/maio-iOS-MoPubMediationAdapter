@@ -12,5 +12,6 @@
 
 @property (nonatomic, copy, readonly) NSString * adapterVersion;
 @property (nonatomic, copy, readonly) NSString * biddingToken;
+@property (nonatomic, copy, readonly) NSString * moPubNetworkName;
 
 @end

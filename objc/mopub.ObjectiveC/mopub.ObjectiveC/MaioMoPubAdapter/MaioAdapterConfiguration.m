@@ -20,4 +20,8 @@ static NSString* const kMaioAdapterVersion = @"1.4.5.0";
     return nil;
 }
 
+-(NSString *)moPubNetworkName {
+    return @"maio";
+}
+
 @end
