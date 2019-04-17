@@ -7,6 +7,7 @@
 //
 
 #import "MaioAdapterConfiguration.h"
+#import <Maio/Maio.h>
 
 static NSString* const kMaioAdapterVersion = @"1.4.5.0";
 
@@ -22,6 +23,10 @@ static NSString* const kMaioAdapterVersion = @"1.4.5.0";
 
 -(NSString *)moPubNetworkName {
     return @"maio";
+}
+
+-(NSString *)networkSdkVersion {
+    return [Maio sdkVersion];
 }
 
 @end
