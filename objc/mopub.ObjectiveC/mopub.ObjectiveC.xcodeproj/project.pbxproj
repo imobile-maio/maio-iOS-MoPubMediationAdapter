@@ -19,6 +19,7 @@
 		147F2DE1202AC21800E1FECA /* Maio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 147F2DE0202AC21800E1FECA /* Maio.framework */; };
 		147F2DE5202ADDA200E1FECA /* MaioRewardedVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = 147F2DE4202ADDA200E1FECA /* MaioRewardedVideo.m */; };
 		147F2DE8202AF05200E1FECA /* MaioManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 147F2DE7202AF05200E1FECA /* MaioManager.m */; };
+		C21EEF682267352C00F3B485 /* MaioAdapterConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = C21EEF672267352C00F3B485 /* MaioAdapterConfiguration.m */; };
 		C2C86BC2225B69C10061DC2F /* MPServerAdPositioning.m in Sources */ = {isa = PBXBuildFile; fileRef = C2C869FB225B69C10061DC2F /* MPServerAdPositioning.m */; };
 		C2C86BC3225B69C10061DC2F /* MPNativeCustomEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = C2C869FC225B69C10061DC2F /* MPNativeCustomEvent.m */; };
 		C2C86BC4225B69C10061DC2F /* MPNativeAdRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = C2C869FD225B69C10061DC2F /* MPNativeAdRequest.m */; };
@@ -266,6 +267,8 @@
 		147F2DE4202ADDA200E1FECA /* MaioRewardedVideo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MaioRewardedVideo.m; sourceTree = "<group>"; };
 		147F2DE6202AF05200E1FECA /* MaioManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MaioManager.h; sourceTree = "<group>"; };
 		147F2DE7202AF05200E1FECA /* MaioManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MaioManager.m; sourceTree = "<group>"; };
+		C21EEF662267352C00F3B485 /* MaioAdapterConfiguration.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MaioAdapterConfiguration.h; sourceTree = "<group>"; };
+		C21EEF672267352C00F3B485 /* MaioAdapterConfiguration.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MaioAdapterConfiguration.m; sourceTree = "<group>"; };
 		C2C869F9225B69C10061DC2F /* MPBannerCustomEventDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MPBannerCustomEventDelegate.h; sourceTree = "<group>"; };
 		C2C869FB225B69C10061DC2F /* MPServerAdPositioning.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MPServerAdPositioning.m; sourceTree = "<group>"; };
 		C2C869FC225B69C10061DC2F /* MPNativeCustomEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MPNativeCustomEvent.m; sourceTree = "<group>"; };
@@ -772,6 +775,8 @@
 				147F2DE7202AF05200E1FECA /* MaioManager.m */,
 				1476DDF02071F46000D0414A /* MaioError.h */,
 				1476DDF12071F46000D0414A /* MaioError.m */,
+				C21EEF662267352C00F3B485 /* MaioAdapterConfiguration.h */,
+				C21EEF672267352C00F3B485 /* MaioAdapterConfiguration.m */,
 			);
 			path = MaioMoPubAdapter;
 			sourceTree = "<group>";
@@ -1580,6 +1585,7 @@
 				C2C86BDF225B69C10061DC2F /* MPNativeAdConstants.m in Sources */,
 				C2C86BDC225B69C10061DC2F /* MPMoPubNativeCustomEvent.m in Sources */,
 				C2C86C15225B69C10061DC2F /* MPWebView.m in Sources */,
+				C21EEF682267352C00F3B485 /* MaioAdapterConfiguration.m in Sources */,
 				C2C86C72225B69C10061DC2F /* MPMoPubConfiguration.m in Sources */,
 				C2C86C7C225B69C10061DC2F /* MOPUBReplayView.m in Sources */,
 				C2C86C30225B69C10061DC2F /* MPActivityViewControllerHelper+TweetShare.m in Sources */,
