@@ -12,12 +12,12 @@
 @end
 
 @implementation MaioGeneralDelegate {
-    NSMutableSet<id <MaioDelegate>> *_delegates;
+    NSHashTable<id <MaioDelegate>> *_delegates;
 }
 - initWithDelegate:(id <MaioDelegate>)delegate {
     self = [super init];
     if (self) {
-        _delegates = [NSMutableSet set];
+        _delegates = [NSHashTable weakObjectsHashTable];
         [_delegates addObject:delegate];
     }
     return self;
