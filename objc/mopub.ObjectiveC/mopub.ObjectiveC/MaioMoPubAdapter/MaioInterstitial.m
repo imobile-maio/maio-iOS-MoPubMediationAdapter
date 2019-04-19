@@ -56,11 +56,11 @@
     if (!_isAdRequested) {
         return;
     }
-    _isAdRequested = NO;
 
     if (_credentials.zoneId && ![zoneId isEqualToString:_credentials.zoneId]) {
         return;
     }
+    _isAdRequested = NO;
 
     if (newValue) {
         [self.delegate interstitialCustomEvent:self didLoadAd:self];
