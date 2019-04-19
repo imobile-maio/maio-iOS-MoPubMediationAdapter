@@ -6,6 +6,7 @@
 //
 
 #import "ViewController.h"
+#import "MaioAdapterConfiguration.h"
 
 #define AD_UNIT_ID_INTER @"81a6a7820dda490d98f013b4dc32f0a2"
 #define AD_UNIT_ID_REWARD @"a821b308f35542b781f58d2043dc8c44"
@@ -29,7 +30,17 @@
 
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        [[MoPub sharedInstance] initializeRewardedVideoWithGlobalMediationSettings:nil delegate:self];
+        MPMoPubConfiguration *sdkConfig = [[MPMoPubConfiguration alloc] initWithAdUnitIdForAppInitialization:AD_UNIT_ID_REWARD];
+        sdkConfig.globalMediationSettings = @[];
+        sdkConfig.loggingLevel = MPBLogLevelDebug;
+
+        sdkConfig.additionalNetworks = @[[MaioAdapterConfiguration class]];
+        NSDictionary* maioConfig = @{@"configuration-key": @"configuration-value"};
+        sdkConfig.mediatedNetworkConfigurations = [@{@"MaioAdapterConfiguration": maioConfig} mutableCopy];
+
+        [[MoPub sharedInstance] initializeSdkWithConfiguration:sdkConfig completion:^{
+            NSLog(@"SDK initialization complete");
+        }];
         [MPRewardedVideo loadRewardedVideoAdWithAdUnitID:AD_UNIT_ID_REWARD withMediationSettings:nil];
     });
 }
