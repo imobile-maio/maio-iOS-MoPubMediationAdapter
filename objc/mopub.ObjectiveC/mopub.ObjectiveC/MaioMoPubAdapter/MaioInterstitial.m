@@ -10,6 +10,7 @@
 #import "MaioManager.h"
 #import "MaioError.h"
 #import "MPLogging.h"
+#import "MoPub.h"
 
 @implementation MaioInterstitial {
     MaioCredentials *_credentials;
@@ -17,6 +18,14 @@
 }
 
 - (void)requestInterstitialWithCustomEventInfo:(NSDictionary *)info {
+    // If GDPR is required do not initialize SDK
+    if ([MoPub sharedInstance].isGDPRApplicable) {
+        NSError *gdprError = [MaioError gdpr];
+        [self.delegate interstitialCustomEvent:self didFailToLoadAdWithError:gdprError];
+        MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:gdprError], nil);
+        return;
+    }
+
     _credentials = [MaioCredentials credentialsFromDictionary:info];
     if (!_credentials) {
         NSError *credentialError = [MaioError credentials];

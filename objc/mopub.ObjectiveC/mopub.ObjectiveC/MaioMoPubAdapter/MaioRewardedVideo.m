@@ -11,6 +11,7 @@
 #import "MaioError.h"
 #import "MPRewardedVideoReward.h"
 #import "MPLogging.h"
+#import "MoPub.h"
 
 @implementation MaioRewardedVideo {
     MaioCredentials *_credentials;
@@ -23,6 +24,14 @@
 }
 
 - (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info {
+    // If GDPR is required do not initialize SDK
+    if ([MoPub sharedInstance].isGDPRApplicable) {
+        NSError *gdprError = [MaioError gdpr];
+        [self.delegate rewardedVideoDidFailToPlayForCustomEvent:self error:gdprError];
+        MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:gdprError], nil);
+        return;
+    }
+
     MaioManager *manager = [MaioManager sharedInstance];
     MaioCredentials *credentials = [MaioCredentials credentialsFromDictionary:info];
     if (!credentials) {
