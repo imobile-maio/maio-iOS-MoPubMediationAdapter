@@ -42,6 +42,7 @@
             NSLog(@"SDK initialization complete");
         }];
         [MPRewardedVideo loadRewardedVideoAdWithAdUnitID:AD_UNIT_ID_REWARD withMediationSettings:nil];
+        [MPRewardedVideo setDelegate:self forAdUnitId:AD_UNIT_ID_REWARD];
     });
 }
 
@@ -82,6 +83,7 @@
 
 - (IBAction)loadRewardAdButton:(UIButton *)sender {
     [MPRewardedVideo loadRewardedVideoAdWithAdUnitID:AD_UNIT_ID_REWARD withMediationSettings:nil];
+    [MPRewardedVideo setDelegate:self forAdUnitId:AD_UNIT_ID_REWARD];
 }
 
 #pragma mark - Interstitial Ad Delegates
