@@ -154,7 +154,7 @@
         return;
     }
     NSError *loadError = [MaioError loadFailedWithReason:reason];
-    [self.delegate rewardedVideoDidFailToPlayForCustomEvent:self error:loadError];
+    [self.delegate rewardedVideoDidFailToLoadAdForCustomEvent:self error:loadError];
     MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:loadError], _credentials.zoneId);
 }
 
