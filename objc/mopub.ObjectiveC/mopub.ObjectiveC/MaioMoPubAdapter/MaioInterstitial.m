@@ -19,7 +19,7 @@
 
 - (void)requestInterstitialWithCustomEventInfo:(NSDictionary *)info {
     // If GDPR is required do not initialize SDK
-    if ([MoPub sharedInstance].isGDPRApplicable) {
+    if ([MoPub sharedInstance].isGDPRApplicable == MPBoolYes) {
         NSError *gdprError = [MaioError gdpr];
         [self.delegate interstitialCustomEvent:self didFailToLoadAdWithError:gdprError];
         MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:gdprError], nil);

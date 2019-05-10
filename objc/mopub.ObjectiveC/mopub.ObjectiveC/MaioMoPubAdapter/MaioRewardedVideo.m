@@ -25,7 +25,7 @@
 
 - (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info {
     // If GDPR is required do not initialize SDK
-    if ([MoPub sharedInstance].isGDPRApplicable) {
+    if ([MoPub sharedInstance].isGDPRApplicable == MPBoolYes) {
         NSError *gdprError = [MaioError gdpr];
         [self.delegate rewardedVideoDidFailToPlayForCustomEvent:self error:gdprError];
         MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:gdprError], nil);
