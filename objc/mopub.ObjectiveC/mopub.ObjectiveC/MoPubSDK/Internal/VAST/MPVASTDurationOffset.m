@@ -1,8 +1,9 @@
 //
 //  MPVASTDurationOffset.m
-//  MoPub
 //
-//  Copyright (c) 2015 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPVASTDurationOffset.h"
@@ -18,13 +19,13 @@
         if (!_offset) {
             return nil;
         }
-
+        
         BOOL isPercentage = [MPVASTStringUtilities stringRepresentsNonNegativePercentage:_offset];
         BOOL isDuration = [MPVASTStringUtilities stringRepresentsNonNegativeDuration:_offset];
         if (!isPercentage && !isDuration) {
             return nil;
         }
-
+        
         _type = isDuration ? MPVASTDurationOffsetTypeAbsolute : MPVASTDurationOffsetTypePercentage;
     }
     return self;
@@ -35,7 +36,7 @@
     if (duration < 0) {
         return 0;
     }
-
+    
     if (self.type == MPVASTDurationOffsetTypeAbsolute) {
         return [MPVASTStringUtilities timeIntervalFromString:self.offset];
     } else if (self.type == MPVASTDurationOffsetTypePercentage) {

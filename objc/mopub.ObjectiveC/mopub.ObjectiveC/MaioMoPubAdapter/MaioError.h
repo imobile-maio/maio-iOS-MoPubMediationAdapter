@@ -13,4 +13,6 @@
 + (NSError *)loadFailed;
 
 + (NSError *)loadFailedWithReason:(MaioFailReason)reason;
+
++ (NSError *)gdpr;
 @end

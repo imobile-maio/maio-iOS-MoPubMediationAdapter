@@ -1,12 +1,17 @@
 //
 //  MPViewabilityAdapterMoat.m
-//  MoPubSDK
 //
-//  Copyright © 2017 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
+#if __has_include("MoPub.h")
 #import "MPLogging.h"
+#endif
+
 #import "MPViewabilityAdapterMoat.h"
+#import <WebKit/WebKit.h>
 
 #if __has_include(<MPUBMoatMobileAppKit/MPUBMoatMobileAppKit.h>)
 #import <MPUBMoatMobileAppKit/MPUBMoatMobileAppKit.h>
@@ -22,14 +27,14 @@ static NSString *const kMOATSendAdStoppedJavascript = @"MoTracker.sendMoatAdStop
 
 #ifdef __HAS_MOAT_FRAMEWORK_
 @property (nonatomic, strong) MPUBMoatWebTracker * moatWebTracker;
-@property (nonatomic, strong) MPWebView *webView;
+@property (nonatomic, strong) UIView *webView;
 @property (nonatomic, assign) BOOL isVideo;
 #endif
 @end
 
 @implementation MPViewabilityAdapterMoat
 
-- (instancetype)initWithAdView:(MPWebView *)webView isVideo:(BOOL)isVideo startTrackingImmediately:(BOOL)startTracking {
+- (instancetype)initWithAdView:(UIView *)webView isVideo:(BOOL)isVideo startTrackingImmediately:(BOOL)startTracking {
     if (self = [super init]) {
         _isTracking = NO;
 
@@ -46,23 +51,18 @@ static NSString *const kMOATSendAdStoppedJavascript = @"MoTracker.sendMoatAdStop
             [[MPUBMoatAnalytics sharedInstance] startWithOptions:options];
         });
 
-        // While the viewability SDKs have features that allow the developer to pass in a container view, WKWebView is
-        // not always in MPWebView's view hierarchy. Pass in the contained web view to be safe, as we don't know for
-        // sure *how* or *when* MPWebView is traversed.
-        UIView *view = webView.containedWebView;
-
-        _moatWebTracker = [MPUBMoatWebTracker trackerWithWebComponent:view];
+        _moatWebTracker = [MPUBMoatWebTracker trackerWithWebComponent:webView];
         _webView = webView;
         _isVideo = isVideo;
         if (_moatWebTracker == nil) {
-            NSString * adViewClassName = NSStringFromClass([view class]);
+            NSString * adViewClassName = NSStringFromClass([webView class]);
             MPLogError(@"Couldn't attach Moat to %@.", adViewClassName);
         }
 
         if (startTracking) {
             [_moatWebTracker startTracking];
             _isTracking = YES;
-            MPLogInfo(@"[Viewability] MOAT tracking started");
+            MPLogInfo(@"MOAT tracking started");
         }
 #endif
     }
@@ -78,7 +78,7 @@ static NSString *const kMOATSendAdStoppedJavascript = @"MoTracker.sendMoatAdStop
     if (!self.isTracking && self.moatWebTracker != nil) {
         [self.moatWebTracker startTracking];
         self.isTracking = YES;
-        MPLogInfo(@"[Viewability] MOAT tracking started");
+        MPLogInfo(@"MOAT tracking started");
     }
 #endif
 }
@@ -91,17 +91,24 @@ static NSString *const kMOATSendAdStoppedJavascript = @"MoTracker.sendMoatAdStop
         void (^moatEndTrackingBlock)(void) = ^{
             [self.moatWebTracker stopTracking];
             if (self.moatWebTracker) {
-                MPLogInfo(@"[Viewability] MOAT tracking stopped");
+                MPLogInfo(@"MOAT tracking stopped");
             }
         };
         // If video, as a safeguard, dispatch `AdStopped` event before we stop tracking.
         // (MoTracker makes sure AdStopped is only dispatched once no matter how many times
         // this function is called)
         if (self.isVideo) {
-            [self.webView evaluateJavaScript:kMOATSendAdStoppedJavascript
-                           completionHandler:^(id result, NSError *error){
-                               moatEndTrackingBlock();
-                           }];
+            if ([self.webView isKindOfClass:[WKWebView class]]) {
+                WKWebView *typedWebView = (WKWebView *)self.webView;
+                [typedWebView evaluateJavaScript:kMOATSendAdStoppedJavascript
+                               completionHandler:^(id result, NSError *error){
+                                   moatEndTrackingBlock();
+                               }];
+            } else if ([self.webView isKindOfClass:[UIWebView class]]) {
+                UIWebView *typedWebView = (UIWebView *)self.webView;
+                [typedWebView stringByEvaluatingJavaScriptFromString:kMOATSendAdStoppedJavascript];
+                moatEndTrackingBlock();
+            }
         } else {
             moatEndTrackingBlock();
         }

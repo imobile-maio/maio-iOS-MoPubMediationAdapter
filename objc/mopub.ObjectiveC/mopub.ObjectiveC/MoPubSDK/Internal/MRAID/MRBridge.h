@@ -1,8 +1,9 @@
 //
 //  MRBridge.h
-//  MoPubSDK
 //
-//  Copyright (c) 2014 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import <UIKit/UIKit.h>
@@ -16,7 +17,7 @@
  * The `MRBridge` class is an intermediate object between native code and JavaScript for
  * MRAID ads. The MRAID web view communicates events to `MRBridge` which translates them
  * down to native code. Likewise, native code will communicate with `MRBridge` to execute
- * commands inside the JavaScript. `MRBridge` also inserts mraid.js into the web view when
+ * commands inside the JavaScript. `MRBridge` also inserts mraid.js into the web view when 
  * loading an ad's HTML.
  */
 @interface MRBridge : NSObject
@@ -24,7 +25,7 @@
 @property (nonatomic, assign) BOOL shouldHandleRequests;
 @property (nonatomic, weak) id<MRBridgeDelegate> delegate;
 
-- (instancetype)initWithWebView:(MPWebView *)webView;
+- (instancetype)initWithWebView:(MPWebView *)webView delegate:(id<MRBridgeDelegate>)delegate;
 
 - (void)loadHTMLString:(NSString *)HTML baseURL:(NSURL *)baseURL;
 
@@ -34,7 +35,7 @@
 - (void)fireErrorEventForAction:(NSString *)action withMessage:(NSString *)message;
 
 /*
- * fireSizeChangeEvent: will always execute the javascript to notify mraid bridge that the size of the ad may have
+ * fireSizeChangeEvent: will always execute the javascript to notify mraid bridge that the size of the ad may have 
  * changed. mraid.js will only fire the change event if the size has actually changed.
  */
 - (void)fireSizeChangeEvent:(CGSize)size;

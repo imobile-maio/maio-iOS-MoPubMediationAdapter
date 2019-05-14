@@ -1,8 +1,9 @@
 //
 //  MPRealTimeTimer.h
-//  MoPubSampleApp
 //
-//  Copyright © 2017 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import <UIKit/UIKit.h>
@@ -10,7 +11,7 @@
 /***
  * MPRealTimeTimer is a class meant for situations in which one may want to disaptch an event for later without
  * any regard for application state. Backgrounding and suspension will not affect time keeping. MPRealTimeTimer will NOT
- * fire while the application is backgrounded or suspended, but will fire immediately upon foregrounding if the
+ * fire while the application is backgrounded or suspended, but will fire immediately upon foregrounding if the 
  * application is not foregrounded when the time interval elapses.
  *
  * Note: MPRealTimeTimer uses NSTimer as a base and as such perfect accuracy is not guaranteed.

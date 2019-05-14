@@ -1,12 +1,14 @@
 //
 //  MPIdentityProvider.m
-//  MoPub
 //
-//  Copyright (c) 2013 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPIdentityProvider.h"
 #import "MPGlobal.h"
+#import "MPConsentManager.h"
 #import <AdSupport/AdSupport.h>
 
 #define MOPUB_IDENTIFIER_DEFAULTS_KEY @"com.mopub.identifier"
@@ -17,13 +19,24 @@
 static BOOL gFrequencyCappingIdUsageEnabled = YES;
 
 @interface MPIdentityProvider ()
+@property (class, nonatomic, readonly) NSCalendar * iso8601Calendar;
 
-+ (NSString *)identifierFromASIdentifierManager:(BOOL)obfuscate;
 + (NSString *)mopubIdentifier:(BOOL)obfuscate;
 
 @end
 
 @implementation MPIdentityProvider
+
++ (NSCalendar *)iso8601Calendar {
+    static dispatch_once_t onceToken;
+    static NSCalendar * _iso8601Calendar;
+    dispatch_once(&onceToken, ^{
+        _iso8601Calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierISO8601];
+        _iso8601Calendar.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
+    });
+    
+    return _iso8601Calendar;
+}
 
 + (NSString *)identifier
 {
@@ -37,7 +50,7 @@ static BOOL gFrequencyCappingIdUsageEnabled = YES;
 
 + (NSString *)_identifier:(BOOL)obfuscate
 {
-    if (![self isAdvertisingIdAllZero]) {
+    if (MPIdentityProvider.advertisingTrackingEnabled && [MPConsentManager sharedManager].canCollectPersonalInfo) {
         return [self identifierFromASIdentifierManager:obfuscate];
     } else {
         return [self mopubIdentifier:obfuscate];
@@ -54,9 +67,11 @@ static BOOL gFrequencyCappingIdUsageEnabled = YES;
     if (obfuscate) {
         return @"ifa:XXXX";
     }
-
+    if (!MPIdentityProvider.advertisingTrackingEnabled) {
+        return nil;
+    }
+    
     NSString *identifier = [[ASIdentifierManager sharedManager].advertisingIdentifier UUIDString];
-
     return [NSString stringWithFormat:@"ifa:%@", [identifier uppercaseString]];
 }
 
@@ -70,21 +85,25 @@ static BOOL gFrequencyCappingIdUsageEnabled = YES;
         return @"mopub:XXXX";
     }
 
-    // reset identifier every 24 hours
-    NSDate *lastSetDate = [[NSUserDefaults standardUserDefaults] objectForKey:MOPUB_IDENTIFIER_LAST_SET_TIME_KEY];
-    if (!lastSetDate) {
-        [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:MOPUB_IDENTIFIER_LAST_SET_TIME_KEY];
+    // Compare the current timestamp to the timestamp of the last MoPub identifier generation.
+    NSDate * now = [NSDate date];
+    NSDate * lastSetDate = [[NSUserDefaults standardUserDefaults] objectForKey:MOPUB_IDENTIFIER_LAST_SET_TIME_KEY];
+    
+    // MoPub identifier has not been set before. Set the timestamp and let the identifer
+    // be generated.
+    if (lastSetDate == nil) {
+        [[NSUserDefaults standardUserDefaults] setObject:now forKey:MOPUB_IDENTIFIER_LAST_SET_TIME_KEY];
         [[NSUserDefaults standardUserDefaults] synchronize];
-    } else {
-        NSTimeInterval diff = [[NSDate date] timeIntervalSinceDate:lastSetDate];
-        if (diff > MOPUB_DAY_IN_SECONDS) {
-            [[NSUserDefaults standardUserDefaults] setObject:[NSDate date] forKey:MOPUB_IDENTIFIER_LAST_SET_TIME_KEY];
-            [[NSUserDefaults standardUserDefaults] removeObjectForKey:MOPUB_IDENTIFIER_DEFAULTS_KEY];
-        }
+    }
+    // Current day does not match the same day when the identifier was generated.
+    // Invalidate the current identifier so it can be regenerated.
+    else if (![MPIdentityProvider.iso8601Calendar isDate:now inSameDayAsDate:lastSetDate]) {
+        [[NSUserDefaults standardUserDefaults] setObject:now forKey:MOPUB_IDENTIFIER_LAST_SET_TIME_KEY];
+        [[NSUserDefaults standardUserDefaults] removeObjectForKey:MOPUB_IDENTIFIER_DEFAULTS_KEY];
     }
 
-    NSString *identifier = [[NSUserDefaults standardUserDefaults] objectForKey:MOPUB_IDENTIFIER_DEFAULTS_KEY];
-    if (!identifier) {
+    NSString * identifier = [[NSUserDefaults standardUserDefaults] objectForKey:MOPUB_IDENTIFIER_DEFAULTS_KEY];
+    if (identifier == nil) {
         CFUUIDRef uuidObject = CFUUIDCreate(kCFAllocatorDefault);
         NSString *uuidStr = (NSString *)CFBridgingRelease(CFUUIDCreateString(kCFAllocatorDefault, uuidObject));
         CFRelease(uuidObject);
@@ -105,21 +124,6 @@ static BOOL gFrequencyCappingIdUsageEnabled = YES;
 + (BOOL)frequencyCappingIdUsageEnabled
 {
     return gFrequencyCappingIdUsageEnabled;
-}
-
-
-
-// Beginning in iOS 10, when a user enables "Limit Ad Tracking", the OS will send advertising identifier with value of
-// 00000000-0000-0000-0000-000000000000
-
-+ (BOOL)isAdvertisingIdAllZero {
-    NSString *identifier = [[ASIdentifierManager sharedManager].advertisingIdentifier UUIDString];
-    if (!identifier) {
-        // when identifier is nil, ifa:(null) is sent.
-        return false;
-    }  else {
-        return [identifier isEqualToString:MOPUB_ALL_ZERO_UUID];
-    }
 }
 
 @end

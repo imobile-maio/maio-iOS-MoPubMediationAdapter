@@ -1,8 +1,9 @@
 //
 //  MPGlobal.h
-//  MoPub
 //
-//  Copyright 2011 MoPub, Inc. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import <Foundation/Foundation.h>
@@ -15,7 +16,7 @@
 UIInterfaceOrientation MPInterfaceOrientation(void);
 UIWindow *MPKeyWindow(void);
 CGFloat MPStatusBarHeight(void);
-CGRect MPApplicationFrame(void);
+CGRect MPApplicationFrame(BOOL includeSafeAreaInsets);
 CGRect MPScreenBounds(void);
 CGSize MPScreenResolution(void);
 CGFloat MPDeviceScaleFactor(void);
@@ -50,19 +51,19 @@ NSArray *MPConvertStringArrayToURLArray(NSArray *strArray);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum {
+typedef NS_ENUM(NSUInteger, MPInterstitialCloseButtonStyle) {
     MPInterstitialCloseButtonStyleAlwaysVisible,
     MPInterstitialCloseButtonStyleAlwaysHidden,
-    MPInterstitialCloseButtonStyleAdControlled
+    MPInterstitialCloseButtonStyleAdControlled,
 };
-typedef NSUInteger MPInterstitialCloseButtonStyle;
 
-enum {
+typedef NS_ENUM(NSUInteger, MPInterstitialOrientationType) {
     MPInterstitialOrientationTypePortrait,
     MPInterstitialOrientationTypeLandscape,
-    MPInterstitialOrientationTypeAll
+    MPInterstitialOrientationTypeAll,
 };
-typedef NSUInteger MPInterstitialOrientationType;
+
+UIInterfaceOrientationMask MPInterstitialOrientationTypeToUIInterfaceOrientationMask(MPInterstitialOrientationType type);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

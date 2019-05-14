@@ -1,13 +1,15 @@
 //
 //  MPClosableView.m
-//  MoPubSDK
 //
-//  Copyright (c) 2014 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPClosableView.h"
-#import "MPInstanceProvider.h"
+#import "MPGlobal.h"
 #import "MPUserInteractionGestureRecognizer.h"
+#import "MPWebView.h"
 
 static CGFloat kCloseRegionWidth = 50.0f;
 static CGFloat kCloseRegionHeight = 50.0f;
@@ -18,7 +20,7 @@ CGRect MPClosableViewCustomCloseButtonFrame(CGSize size, MPClosableViewCloseButt
     CGFloat width = size.width;
     CGFloat height = size.height;
     CGRect closeButtonFrame = CGRectMake(0.0f, 0.0f, kCloseRegionWidth, kCloseRegionHeight);
-
+    
     switch (closeButtonLocation) {
         case MPClosableViewCloseButtonLocationTopRight:
             closeButtonFrame.origin = CGPointMake(width-kCloseRegionWidth, 0.0f);
@@ -45,7 +47,7 @@ CGRect MPClosableViewCustomCloseButtonFrame(CGSize size, MPClosableViewCloseButt
             closeButtonFrame.origin = CGPointMake(width-kCloseRegionWidth, 0.0f);
             break;
     }
-
+    
     return closeButtonFrame;
 }
 
@@ -60,34 +62,43 @@ CGRect MPClosableViewCustomCloseButtonFrame(CGSize size, MPClosableViewCloseButt
 
 @implementation MPClosableView
 
-- (instancetype)initWithFrame:(CGRect)frame closeButtonType:(MPClosableViewCloseButtonType)closeButtonType
-{
+- (instancetype)initWithFrame:(CGRect)frame
+                      webView:(MPWebView *)webView
+                     delegate:(id<MPClosableViewDelegate>)delegate {
     self = [super initWithFrame:frame];
-
+    
     if (self) {
         self.backgroundColor = [UIColor clearColor];
         self.opaque = NO;
-
+        self.clipsToBounds = YES;
+        
+        _delegate = delegate;
+        
+        // Set up close button
         _closeButtonLocation = MPClosableViewCloseButtonLocationTopRight;
-
+        
         _userInteractionRecognizer = [[MPUserInteractionGestureRecognizer alloc] initWithTarget:self action:@selector(handleInteraction:)];
         _userInteractionRecognizer.cancelsTouchesInView = NO;
         [self addGestureRecognizer:_userInteractionRecognizer];
         _userInteractionRecognizer.delegate = self;
-
+        
         _closeButtonImage = [UIImage imageNamed:MPResourcePathForResource(kExpandableCloseButtonImageName)];
-
+        
         _closeButton = [UIButton buttonWithType:UIButtonTypeCustom];
         _closeButton.backgroundColor = [UIColor clearColor];
         _closeButton.accessibilityLabel = @"Close Interstitial Ad";
-
+        
         [_closeButton addTarget:self action:@selector(closeButtonPressed) forControlEvents:UIControlEventTouchUpInside];
-
-        [self setCloseButtonType:closeButtonType];
-
+        
+        [self setCloseButtonType:MPClosableViewCloseButtonTypeTappableWithImage];
+        
         [self addSubview:_closeButton];
+        
+        // Set up web view
+        webView.frame = self.bounds;
+        [self addSubview:webView];
     }
-
+    
     return self;
 }
 
@@ -99,14 +110,15 @@ CGRect MPClosableViewCustomCloseButtonFrame(CGSize size, MPClosableViewCloseButt
 
 - (void)layoutSubviews
 {
+    [super layoutSubviews];
     if (@available(iOS 11, *)) {
         self.closeButton.translatesAutoresizingMaskIntoConstraints = NO;
-
+        
         NSMutableArray <NSLayoutConstraint *> *constraints = [NSMutableArray arrayWithObjects:
                                                               [self.closeButton.widthAnchor constraintEqualToConstant:kCloseRegionWidth],
                                                               [self.closeButton.heightAnchor constraintEqualToConstant:kCloseRegionHeight],
                                                               nil];
-
+        
         switch (self.closeButtonLocation) {
             case MPClosableViewCloseButtonLocationTopRight:
                 [constraints addObject:[self.closeButton.trailingAnchor constraintEqualToAnchor:self.safeAreaLayoutGuide.trailingAnchor]];
@@ -142,12 +154,12 @@ CGRect MPClosableViewCustomCloseButtonFrame(CGSize size, MPClosableViewCloseButt
                 [constraints addObject:[self.closeButton.topAnchor constraintEqualToAnchor:self.safeAreaLayoutGuide.topAnchor]];
                 break;
         }
-
+        
         [NSLayoutConstraint activateConstraints:constraints];
     } else {
         self.closeButton.frame = MPClosableViewCustomCloseButtonFrame(self.bounds.size, self.closeButtonLocation);
     }
-
+    
     [self bringSubviewToFront:self.closeButton];
 }
 

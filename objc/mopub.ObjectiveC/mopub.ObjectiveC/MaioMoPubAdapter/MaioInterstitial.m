@@ -9,6 +9,8 @@
 #import "MaioCredentials.h"
 #import "MaioManager.h"
 #import "MaioError.h"
+#import "MPLogging.h"
+#import "MoPub.h"
 
 @implementation MaioInterstitial {
     MaioCredentials *_credentials;
@@ -16,12 +18,24 @@
 }
 
 - (void)requestInterstitialWithCustomEventInfo:(NSDictionary *)info {
-    _credentials = [MaioCredentials credentialsFromDictionary:info];
-    if (!_credentials) {
-        [self.delegate interstitialCustomEvent:self
-                      didFailToLoadAdWithError:[MaioError credentials]];
+    // If GDPR is required do not initialize SDK
+    if ([MoPub sharedInstance].isGDPRApplicable == MPBoolYes) {
+        NSError *gdprError = [MaioError gdpr];
+        [self.delegate interstitialCustomEvent:self didFailToLoadAdWithError:gdprError];
+        MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:gdprError], nil);
         return;
     }
+
+    _credentials = [MaioCredentials credentialsFromDictionary:info];
+    if (!_credentials) {
+        NSError *credentialError = [MaioError credentials];
+        [self.delegate interstitialCustomEvent:self
+                      didFailToLoadAdWithError:credentialError];
+        MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:credentialError], nil);
+        return;
+    }
+
+    MPLogAdEvent([MPLogEvent adLoadAttemptForAdapter:NSStringFromClass(self.class) dspCreativeId:nil dspName:nil], _credentials.zoneId);
 
     MaioManager *manager = [MaioManager sharedInstance];
 
@@ -37,6 +51,7 @@
 
     if ([manager canShowAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId]) {
         [self.delegate interstitialCustomEvent:self didLoadAd:self];
+        MPLogAdEvent([MPLogEvent adLoadSuccessForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     } else {
         _isAdRequested = YES;
     }
@@ -44,9 +59,10 @@
 }
 
 - (void)showInterstitialFromRootViewController:(UIViewController *)rootViewController {
+    MPLogAdEvent([MPLogEvent adShowAttemptForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
+
     MaioManager *manager = [MaioManager sharedInstance];
     if (![manager canShowAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId]) return;
-
     [manager showAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId];
 }
 
@@ -56,16 +72,19 @@
     if (!_isAdRequested) {
         return;
     }
-    _isAdRequested = NO;
 
     if (_credentials.zoneId && ![zoneId isEqualToString:_credentials.zoneId]) {
         return;
     }
+    _isAdRequested = NO;
 
     if (newValue) {
         [self.delegate interstitialCustomEvent:self didLoadAd:self];
+        MPLogAdEvent([MPLogEvent adLoadSuccessForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     } else {
-        [self.delegate interstitialCustomEvent:self didFailToLoadAdWithError:[MaioError loadFailed]];
+        NSError *loadError = [MaioError loadFailed];
+        [self.delegate interstitialCustomEvent:self didFailToLoadAdWithError:loadError];
+        MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:loadError], _credentials.zoneId);
     }
 }
 
@@ -76,6 +95,8 @@
 
     [self.delegate interstitialCustomEventDidReceiveTapEvent:self];
     [self.delegate interstitialCustomEventWillLeaveApplication:self];
+    MPLogAdEvent([MPLogEvent adTappedForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
+    MPLogAdEvent([MPLogEvent adWillLeaveApplicationForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
 }
 
 - (void)maioDidCloseAd:(NSString *)zoneId {
@@ -85,6 +106,8 @@
 
     [self.delegate interstitialCustomEventWillDisappear:self];
     [self.delegate interstitialCustomEventDidDisappear:self];
+    MPLogAdEvent([MPLogEvent adWillDisappearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
+    MPLogAdEvent([MPLogEvent adDidDisappearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
 }
 
 - (void)maioWillStartAd:(NSString *)zoneId {
@@ -94,6 +117,9 @@
 
     [self.delegate interstitialCustomEventWillAppear:self];
     [self.delegate interstitialCustomEventDidAppear:self];
+    MPLogAdEvent([MPLogEvent adWillAppearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
+    MPLogAdEvent([MPLogEvent adDidAppearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
+    MPLogAdEvent([MPLogEvent adShowSuccessForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
 }
 
 - (void)maioDidFail:(NSString *)zoneId reason:(MaioFailReason)reason {
@@ -101,7 +127,16 @@
         return;
     }
 
-    [self.delegate interstitialCustomEvent:self didFailToLoadAdWithError:[MaioError loadFailedWithReason:reason]];
+    if (reason == MaioFailReasonVideoPlayback) {
+        NSError *playbackError = [MaioError loadFailedWithReason:reason];
+        [self.delegate interstitialCustomEvent:self didFailToLoadAdWithError:playbackError];
+        MPLogAdEvent([MPLogEvent adShowFailedForAdapter:NSStringFromClass(self.class) error:playbackError], _credentials.zoneId);
+        return;
+    }
+
+    NSError *loadError = [MaioError loadFailedWithReason:reason];
+    [self.delegate interstitialCustomEvent:self didFailToLoadAdWithError:loadError];
+    MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:loadError], _credentials.zoneId);
 }
 
 @end

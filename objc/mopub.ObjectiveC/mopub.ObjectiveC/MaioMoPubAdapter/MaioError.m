@@ -22,6 +22,10 @@
     return [self errorWithReason:[NSString stringWithFormat:@"Maio load failed with reason: %ld", (long)reason]];
 }
 
++(NSError *)gdpr {
+    return [self errorWithReason:@"If GDPR is required do not initialize maio SDK"];
+}
+
 +(NSError *) errorWithReason:(NSString *)reason {
     return [NSError errorWithDomain:@"jp.maio"
                                code:0

@@ -1,8 +1,9 @@
 //
 //  MPUserInteractionGestureRecognizer.m
-//  MoPub
 //
-//  Copyright (c) 2014 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPUserInteractionGestureRecognizer.h"
@@ -15,7 +16,7 @@
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
     [super touchesBegan:touches withEvent:event];
-
+    
     if (self.state == UIGestureRecognizerStatePossible) {
         self.state = UIGestureRecognizerStateRecognized;
     }
@@ -24,21 +25,21 @@
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
     [super touchesMoved:touches withEvent:event];
-
+    
     self.state = UIGestureRecognizerStateFailed;
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
     [super touchesEnded:touches withEvent:event];
-
+    
     self.state = UIGestureRecognizerStateFailed;
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
     [super touchesCancelled:touches withEvent:event];
-
+    
     self.state = UIGestureRecognizerStateFailed;
 }
 

@@ -1,8 +1,9 @@
 //
 //  MPAdAlertGestureRecognizer.m
-//  MoPub
 //
-//  Copyright (c) 2013 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPAdAlertGestureRecognizer.h"
@@ -40,7 +41,7 @@ NSInteger const kMPAdAlertGestureMaxAllowedYAxisMovement = 50;
     if (self != nil) {
         [self commonInit];
     }
-
+    
     return self;
 }
 
@@ -50,7 +51,7 @@ NSInteger const kMPAdAlertGestureMaxAllowedYAxisMovement = 50;
     if (self != nil) {
         [self commonInit];
     }
-
+    
     return self;
 }
 
@@ -77,7 +78,7 @@ NSInteger const kMPAdAlertGestureMaxAllowedYAxisMovement = 50;
         self.state = UIGestureRecognizerStateFailed;
         return;
     }
-
+    
     CGPoint nowPoint = [touches.anyObject locationInView:self.view];
     self.inflectionPoint = nowPoint;
     self.startingPoint = nowPoint;
@@ -86,31 +87,31 @@ NSInteger const kMPAdAlertGestureMaxAllowedYAxisMovement = 50;
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
     [super touchesMoved:touches withEvent:event];
-
+    
     if (self.state == UIGestureRecognizerStateFailed) {
         return;
     }
-
+   
     [self updateAlertGestureStateWithTouches:touches];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
     [super touchesEnded:touches withEvent:event];
-
+    
     if ((self.state == UIGestureRecognizerStatePossible) && self.currentAlertGestureState == MPAdAlertGestureRecognizerState_Recognized) {
         self.state = UIGestureRecognizerStateRecognized;
     }
-
+    
     [self resetToInitialState];
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
     [super touchesCancelled:touches withEvent:event];
-
+    
     [self resetToInitialState];
-
+    
     self.state = UIGestureRecognizerStateFailed;
 }
 
@@ -136,7 +137,7 @@ NSInteger const kMPAdAlertGestureMaxAllowedYAxisMovement = 50;
 {
     CGPoint nowPoint = [touches.anyObject locationInView:self.view];
     CGPoint prevPoint = [touches.anyObject previousLocationInView:self.view];
-
+    
     // first zig must be to the right, x must increase
     // if the touch has covered enough distance, then we're ready to move on to the next state
     if (nowPoint.x > prevPoint.x && nowPoint.x - self.inflectionPoint.x >= self.minTrackedDistanceForZigZag) {
@@ -159,18 +160,18 @@ NSInteger const kMPAdAlertGestureMaxAllowedYAxisMovement = 50;
 {
     CGPoint nowPoint = [touches.anyObject locationInView:self.view];
     CGPoint prevPoint = [touches.anyObject previousLocationInView:self.view];
-
+    
     // zag to the left, x must decrease
     // if the touch has covered enough distance, then we're ready to move on to the next state
     if (nowPoint.x < prevPoint.x && self.inflectionPoint.x - nowPoint.x >= self.minTrackedDistanceForZigZag) {
         BOOL prevThresholdState = self.thresholdReached;
         self.thresholdReached = YES;
-
+        
         // increment once, and only once, after we hit the threshold for the zag
         if (prevThresholdState != self.thresholdReached) {
             self.curNumZigZags++;
         }
-
+        
         if (self.curNumZigZags >= self.numZigZagsForRecognition) {
             self.currentAlertGestureState = MPAdAlertGestureRecognizerState_Recognized;
         }
@@ -195,15 +196,15 @@ NSInteger const kMPAdAlertGestureMaxAllowedYAxisMovement = 50;
         self.state = UIGestureRecognizerStateFailed;
         return;
     }
-
+    
     switch (self.currentAlertGestureState) {
         case MPAdAlertGestureRecognizerState_ZigRight1:
             [self handleZigRightGestureStateWithTouches:touches];
-
+            
             break;
         case MPAdAlertGestureRecognizerState_ZagLeft2:
             [self handleZagLeftGestureStateWithTouches:touches];
-
+            
             break;
         default:
             break;
@@ -213,14 +214,14 @@ NSInteger const kMPAdAlertGestureMaxAllowedYAxisMovement = 50;
 - (BOOL)validYAxisMovementForTouches:(NSSet *)touches
 {
     CGPoint nowPoint = [touches.anyObject locationInView:self.view];
-
+    
     return fabs(nowPoint.y - self.startingPoint.y) <= kMPAdAlertGestureMaxAllowedYAxisMovement;
 }
 
 - (BOOL)touchIsWithinBoundsForTouches:(NSSet *)touches
 {
     CGPoint nowPoint = [touches.anyObject locationInView:self.view];
-
+    
     // 1. use self.view.bounds because locationInView converts to self.view's coordinate system
     // 2. ensure user doesn't stray too far in the Y-axis
     return CGRectContainsPoint(self.view.bounds, nowPoint) && [self validYAxisMovementForTouches:touches];

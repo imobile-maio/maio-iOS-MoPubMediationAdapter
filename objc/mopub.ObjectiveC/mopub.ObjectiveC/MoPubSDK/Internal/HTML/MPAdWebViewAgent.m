@@ -1,8 +1,9 @@
 //
 //  MPAdWebViewAgent.m
-//  MoPub
 //
-//  Copyright (c) 2013 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPAdWebViewAgent.h"
@@ -13,7 +14,6 @@
 #import "NSURL+MPAdditions.h"
 #import "UIWebView+MPAdditions.h"
 #import "MPWebView.h"
-#import "MPInstanceProvider.h"
 #import "MPCoreInstanceProvider.h"
 #import "MPUserInteractionGestureRecognizer.h"
 #import "NSJSONSerialization+MPAdditions.h"
@@ -63,12 +63,12 @@
     self = [super init];
     if (self) {
         _frame = frame;
-
-        self.destinationDisplayAgent = [[MPCoreInstanceProvider sharedProvider] buildMPAdDestinationDisplayAgentWithDelegate:self];
+        
+        self.destinationDisplayAgent = [MPAdDestinationDisplayAgent agentWithDelegate:self];
         self.delegate = delegate;
         self.shouldHandleRequests = YES;
         self.adAlertManager = [[MPCoreInstanceProvider sharedProvider] buildMPAdAlertManagerWithDelegate:self];
-
+        
         self.userInteractionRecognizer = [[MPUserInteractionGestureRecognizer alloc] initWithTarget:self action:@selector(handleInteraction:)];
         self.userInteractionRecognizer.cancelsTouchesInView = NO;
         self.userInteractionRecognizer.delegate = self;
@@ -117,7 +117,7 @@
 - (void)loadConfiguration:(MPAdConfiguration *)configuration
 {
     self.configuration = configuration;
-
+    
     // Initialize web view
     if (self.view != nil) {
         self.view.delegate = nil;
@@ -125,13 +125,14 @@
         self.view = nil;
     }
     self.view = [[MPWebView alloc] initWithFrame:self.frame];
+    self.view.shouldConformToSafeArea = [self isInterstitialAd];
     self.view.delegate = self;
     [self.view addGestureRecognizer:self.userInteractionRecognizer];
 
     // Ignore server configuration size for interstitials. At this point our web view
     // is sized correctly for the device's screen. Currently the server sends down values for a 3.5in
     // screen, and they do not size correctly on a 4in screen.
-    if (configuration.adType != MPAdTypeInterstitial) {
+    if (configuration.adType != MPAdTypeFullscreen) {
         if ([configuration hasPreferredSize]) {
             CGRect frame = self.view.frame;
             frame.size.width = configuration.preferredSize.width;
@@ -140,7 +141,7 @@
         }
     }
 
-    [self.view mp_setScrollable:configuration.scrollable];
+    [self.view mp_setScrollable:NO];
     [self.view disableJavaScriptDialogs];
 
     // Initialize viewability trackers before loading self.view
@@ -162,7 +163,7 @@
             if (![self shouldStartViewabilityDuringInitialization]) {
                 [self startViewabilityTracker];
             }
-
+            
             [self.view stringByEvaluatingJavaScriptFromString:@"webviewDidAppear();"];
             break;
         case MPAdWebViewEventAdDidDisappear:
@@ -230,13 +231,13 @@
         [self performActionForMoPubSpecificURL:URL];
         return NO;
     } else if ([self shouldIntercept:URL navigationType:navigationType]) {
-
+        
         // Disable intercept without user interaction
         if (!self.userInteractedWithWebView) {
             MPLogInfo(@"Redirect without user interaction detected");
             return NO;
         }
-
+        
         [self interceptURL:URL];
         return NO;
     } else {
@@ -266,7 +267,7 @@
             [self.delegate adDidFailToLoadAd:self.view];
             break;
         default:
-            MPLogWarn(@"MPAdWebView - unsupported MoPub URL: %@", [URL absoluteString]);
+            MPLogInfo(@"MPAdWebView - unsupported MoPub URL: %@", [URL absoluteString]);
             break;
     }
 }
@@ -276,8 +277,6 @@
 {
     if ([URL mp_hasTelephoneScheme] || [URL mp_hasTelephonePromptScheme]) {
         return YES;
-    } else if (!(self.configuration.shouldInterceptLinks)) {
-        return NO;
     } else if (navigationType == UIWebViewNavigationTypeLinkClicked) {
         return YES;
     } else if (navigationType == UIWebViewNavigationTypeOther && self.userInteractedWithWebView) {
@@ -320,7 +319,7 @@
 
 - (BOOL)isInterstitialAd
 {
-    return (self.configuration.adType == MPAdTypeInterstitial);
+    return (self.configuration.adType == MPAdTypeFullscreen);
 }
 
 - (void)initAdAlertManager

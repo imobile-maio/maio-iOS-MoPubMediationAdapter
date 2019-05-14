@@ -1,14 +1,14 @@
 //
 //  MPHTMLInterstitialViewController.m
-//  MoPub
 //
-//  Copyright (c) 2012 MoPub, Inc. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPHTMLInterstitialViewController.h"
 #import "MPWebView.h"
 #import "MPAdDestinationDisplayAgent.h"
-#import "MPInstanceProvider.h"
 #import "MPViewabilityTracker.h"
 
 @interface MPHTMLInterstitialViewController ()
@@ -37,8 +37,7 @@
     [super viewDidLoad];
 
     self.view.backgroundColor = [UIColor blackColor];
-    self.backingViewAgent = [[MPInstanceProvider sharedProvider] buildMPAdWebViewAgentWithAdWebViewFrame:self.view.bounds
-                                                                                                delegate:self];
+    self.backingViewAgent = [[MPAdWebViewAgent alloc] initWithAdWebViewFrame:self.view.bounds delegate:self];
 }
 
 #pragma mark - Public
@@ -47,7 +46,7 @@
 {
     [self view];
     [self.backingViewAgent loadConfiguration:configuration];
-
+    
     self.backingView = self.backingViewAgent.view;
     [self.view addSubview:self.backingView];
     self.backingView.frame = self.view.bounds;
@@ -62,7 +61,7 @@
                                                   [self.backingView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
                                                   ]];
     }
-
+    
     [self.backingViewAgent.viewabilityTracker registerFriendlyObstructionView:self.closeButton];
 }
 
@@ -104,11 +103,14 @@
 
 #pragma mark - Autorotation
 
-- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
-    [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
-
-    [self.backingViewAgent rotateToOrientation:self.interfaceOrientation];
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+        UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+        [self.backingViewAgent rotateToOrientation:orientation];
+     } completion:nil];
+    
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
 }
 
 #pragma mark - MPAdWebViewAgentDelegate

@@ -1,8 +1,9 @@
 //
 //  MPVASTLinearAd.m
-//  MoPub
 //
-//  Copyright (c) 2015 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPVASTLinearAd.h"
@@ -69,7 +70,7 @@
     dispatch_once(&onceToken, ^{
         validVideoMimeTypes = [NSSet setWithObjects:@"video/quicktime", @"video/mp4", @"video/3gpp", @"video/3gpp2", @"video/x-m4v", nil];
     });
-
+    
     return validVideoMimeTypes;
 }
 
@@ -80,7 +81,7 @@
     NSArray * sortedMediaFiles = [filteredMediaFiles sortedArrayUsingComparator:^NSComparisonResult(MPVASTMediaFile * a, MPVASTMediaFile * b) {
         return a.bitrate < b.bitrate;
     }];
-
+    
     return (sortedMediaFiles.count > 0 ? sortedMediaFiles[0] : nil);
 }
 

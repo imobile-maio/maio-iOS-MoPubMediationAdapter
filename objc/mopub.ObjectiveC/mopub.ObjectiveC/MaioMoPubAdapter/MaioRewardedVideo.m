@@ -6,11 +6,12 @@
 //
 
 #import "MaioRewardedVideo.h"
-#import "MPLogging.h"
 #import "MaioCredentials.h"
 #import "MaioManager.h"
 #import "MaioError.h"
 #import "MPRewardedVideoReward.h"
+#import "MPLogging.h"
+#import "MoPub.h"
 
 @implementation MaioRewardedVideo {
     MaioCredentials *_credentials;
@@ -23,13 +24,24 @@
 }
 
 - (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info {
+    // If GDPR is required do not initialize SDK
+    if ([MoPub sharedInstance].isGDPRApplicable == MPBoolYes) {
+        NSError *gdprError = [MaioError gdpr];
+        [self.delegate rewardedVideoDidFailToPlayForCustomEvent:self error:gdprError];
+        MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:gdprError], nil);
+        return;
+    }
+
     MaioManager *manager = [MaioManager sharedInstance];
     MaioCredentials *credentials = [MaioCredentials credentialsFromDictionary:info];
     if (!credentials) {
-        [self.delegate rewardedVideoDidFailToLoadAdForCustomEvent:self error:[MaioError credentials]];
+        NSError *credentialError = [MaioError credentials];
+        [self.delegate rewardedVideoDidFailToLoadAdForCustomEvent:self error:credentialError];
+        MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:credentialError], nil);
         return;
     }
     _credentials = credentials;
+    MPLogAdEvent([MPLogEvent adLoadAttemptForAdapter:NSStringFromClass(self.class) dspCreativeId:nil dspName:nil], _credentials.zoneId);
 
     if (![manager isInitialized:credentials.mediaId]) {
         _isAdRequested = YES;
@@ -43,6 +55,7 @@
 
     if ([manager canShowAtMediaId:credentials.mediaId zoneId:credentials.zoneId]) {
         [self.delegate rewardedVideoDidLoadAdForCustomEvent:self];
+        MPLogAdEvent([MPLogEvent adLoadSuccessForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     } else {
         _isAdRequested = YES;
     }
@@ -63,6 +76,7 @@
 }
 
 - (void)presentRewardedVideoFromViewController:(UIViewController *)viewController {
+    MPLogAdEvent([MPLogEvent adShowAttemptForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     [[MaioManager sharedInstance] showAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId];
 }
 
@@ -80,6 +94,7 @@
 
     if (newValue) {
         [self.delegate rewardedVideoDidLoadAdForCustomEvent:self];
+        MPLogAdEvent([MPLogEvent adLoadSuccessForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     }
 }
 
@@ -90,6 +105,8 @@
 
     [self.delegate rewardedVideoDidReceiveTapEventForCustomEvent:self];
     [self.delegate rewardedVideoWillLeaveApplicationForCustomEvent:self];
+    MPLogAdEvent([MPLogEvent adTappedForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
+    MPLogAdEvent([MPLogEvent adWillLeaveApplicationForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
 }
 
 - (void)maioWillStartAd:(NSString *)zoneId {
@@ -99,6 +116,9 @@
 
     [self.delegate rewardedVideoWillAppearForCustomEvent:self];
     [self.delegate rewardedVideoDidAppearForCustomEvent:self];
+    MPLogAdEvent([MPLogEvent adWillAppearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
+    MPLogAdEvent([MPLogEvent adDidAppearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
+    MPLogAdEvent([MPLogEvent adShowSuccessForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
 }
 
 - (void)maioDidCloseAd:(NSString *)zoneId {
@@ -108,6 +128,8 @@
 
     [self.delegate rewardedVideoWillDisappearForCustomEvent:self];
     [self.delegate rewardedVideoDidDisappearForCustomEvent:self];
+    MPLogAdEvent([MPLogEvent adWillDisappearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
+    MPLogAdEvent([MPLogEvent adDidDisappearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
 }
 
 - (void)maioDidFinishAd:(NSString *)zoneId playtime:(NSInteger)playtime skipped:(BOOL)skipped rewardParam:(NSString *)rewardParam {
@@ -125,7 +147,15 @@
         return;
     }
 
-    [self.delegate rewardedVideoDidFailToPlayForCustomEvent:self error:[MaioError loadFailedWithReason:reason]];
+    if (reason == MaioFailReasonVideoPlayback) {
+        NSError *playbackError = [MaioError loadFailedWithReason:reason];
+        [self.delegate rewardedVideoDidFailToPlayForCustomEvent:self error:playbackError];
+        MPLogAdEvent([MPLogEvent adShowFailedForAdapter:NSStringFromClass(self.class) error:playbackError], _credentials.zoneId);
+        return;
+    }
+    NSError *loadError = [MaioError loadFailedWithReason:reason];
+    [self.delegate rewardedVideoDidFailToLoadAdForCustomEvent:self error:loadError];
+    MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:loadError], _credentials.zoneId);
 }
 
 @end

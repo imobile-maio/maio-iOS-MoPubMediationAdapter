@@ -1,8 +1,9 @@
 //
 //  MPVideoConfig.m
-//  MoPub
 //
-//  Copyright (c) 2015 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MPVideoConfig.h"
@@ -83,11 +84,11 @@
 - (void)commonInit:(MPVASTResponse *)response additionalTrackers:(NSDictionary *)additionalTrackers
 {
     NSArray *candidates = [self playbackCandidatesFromVASTResponse:response];
-
+    
     if (candidates.count == 0) {
         return;
     }
-
+    
     MPVideoPlaybackCandidate *candidate = candidates[0];
     MPVASTMediaFile *mediaFile = candidate.linearAd.highestBitrateMediaFile;
 
@@ -288,7 +289,7 @@
 
                 [mergedDictionary[key] addObjectsFromArray:dictionary[key]];
             } else {
-                MPLogError(@"TrackingEvents dictionary expected an array object for key '%@' "
+                MPLogInfo(@"TrackingEvents dictionary expected an array object for key '%@' "
                            @"but got an instance of %@ instead.",
                            key, NSStringFromClass([dictionary[key] class]));
             }

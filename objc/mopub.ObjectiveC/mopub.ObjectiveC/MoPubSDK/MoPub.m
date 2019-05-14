@@ -1,24 +1,33 @@
 //
 //  MoPub.m
-//  MoPub
 //
-//  Copyright (c) 2014 MoPub. All rights reserved.
+//  Copyright 2018-2019 Twitter, Inc.
+//  Licensed under the MoPub SDK License Agreement
+//  http://www.mopub.com/legal/sdk-license-agreement/
 //
 
 #import "MoPub.h"
+#import "MPConsentManager.h"
 #import "MPConstants.h"
 #import "MPCoreInstanceProvider.h"
 #import "MPGeolocationProvider.h"
 #import "MPLogging.h"
+#import "MPMediationManager.h"
 #import "MPRewardedVideo.h"
-#import "MPRewardedVideoCustomEvent+Caching.h"
 #import "MPIdentityProvider.h"
 #import "MPWebView.h"
 #import "MOPUBExperimentProvider.h"
+#import "MPViewabilityTracker.h"
+#import "MPAdConversionTracker.h"
+#import "MPConsentManager.h"
+#import "MPConsentChangedNotification.h"
+#import "MPSessionTracker.h"
 
 @interface MoPub ()
 
 @property (nonatomic, strong) NSArray *globalMediationSettings;
+
+@property (nonatomic, assign, readwrite) BOOL isSdkInitialized;
 
 @end
 
@@ -32,6 +41,15 @@
         sharedInstance = [[MoPub alloc] init];
     });
     return sharedInstance;
+}
+
+- (instancetype)init
+{
+    if (self = [super init]) {
+        // Processing personal data if a user is in GDPR region.
+        [self handlePersonalData];
+    }
+    return self;
 }
 
 - (void)setLocationUpdatesEnabled:(BOOL)locationUpdatesEnabled
@@ -59,14 +77,14 @@
     return [MPWebView isForceWKWebView];
 }
 
-- (void)setLogLevel:(MPLogLevel)level
+- (void)setLogLevel:(MPBLogLevel)level
 {
-    MPLogSetLevel(level);
+    MPLogging.consoleLogLevel = level;
 }
 
-- (MPLogLevel)logLevel
+- (MPBLogLevel)logLevel
 {
-    return MPLogGetLevel();
+    return MPLogging.consoleLogLevel;
 }
 
 - (void)setClickthroughDisplayAgentType:(MOPUBDisplayAgentType)displayAgentType
@@ -77,10 +95,6 @@
 - (BOOL)frequencyCappingIdUsageEnabled
 {
     return [MPIdentityProvider frequencyCappingIdUsageEnabled];
-}
-
-- (void)start
-{
 }
 
 // Keep -version and -bundleIdentifier methods around for Fabric backwards compatibility.
@@ -94,23 +108,67 @@
     return MP_BUNDLE_IDENTIFIER;
 }
 
-- (void)initializeRewardedVideoWithGlobalMediationSettings:(NSArray *)globalMediationSettings delegate:(id<MPRewardedVideoDelegate>)delegate
+- (void)initializeSdkWithConfiguration:(MPMoPubConfiguration *)configuration
+                            completion:(void(^_Nullable)(void))completionBlock
 {
-    NSArray * allCachedNetworks = [MPRewardedVideoCustomEvent allCachedNetworks];
-    [self initializeRewardedVideoWithGlobalMediationSettings:globalMediationSettings delegate:delegate networkInitializationOrder:allCachedNetworks];
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        [self setSdkWithConfiguration:configuration completion:completionBlock];
+    });
 }
 
-- (void)initializeRewardedVideoWithGlobalMediationSettings:(NSArray *)globalMediationSettings
-                                                  delegate:(id<MPRewardedVideoDelegate>)delegate
-                                networkInitializationOrder:(NSArray<NSString *> *)order
+- (void)setSdkWithConfiguration:(MPMoPubConfiguration *)configuration
+                     completion:(void(^_Nullable)(void))completionBlock
 {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wundeclared-selector"
-    // initializeWithDelegate: is a known private initialization method on MPRewardedVideo. So we forward the initialization call to that class.
-    [MPRewardedVideo performSelector:@selector(initializeWithDelegate:) withObject:delegate];
-#pragma clang diagnostic pop
-    [MPRewardedVideo initializeWithOrder:order];
-    self.globalMediationSettings = globalMediationSettings;
+    @synchronized (self) {
+        // Set the console logging level.
+        MPLogging.consoleLogLevel = configuration.loggingLevel;
+        
+        // Store the global mediation settings
+        self.globalMediationSettings = configuration.globalMediationSettings;
+        
+        // Create a dispatch group to synchronize mutliple asynchronous tasks.
+        dispatch_group_t initializationGroup = dispatch_group_create();
+        
+        // Configure the consent manager and synchronize regardless of the result
+        // of `checkForDoNotTrackAndTransition`.
+        dispatch_group_enter(initializationGroup);
+        MPConsentManager.sharedManager.adUnitIdUsedForConsent = configuration.adUnitIdForAppInitialization;
+        MPConsentManager.sharedManager.allowLegitimateInterest = configuration.allowLegitimateInterest;
+        [MPConsentManager.sharedManager checkForDoNotTrackAndTransition];
+        [MPConsentManager.sharedManager synchronizeConsentWithCompletion:^(NSError * _Nullable error) {
+            dispatch_group_leave(initializationGroup);
+        }];
+        
+        // Configure session tracker
+        [MPSessionTracker initializeNotificationObservers];
+        
+        // Configure mediated network SDKs
+        __block NSArray<id<MPAdapterConfiguration>> * initializedNetworks = nil;
+        dispatch_group_enter(initializationGroup);
+        [MPMediationManager.sharedManager initializeWithAdditionalProviders:configuration.additionalNetworks
+                                                             configurations:configuration.mediatedNetworkConfigurations
+                                                             requestOptions:configuration.moPubRequestOptions
+                                                                   complete:^(NSError * error, NSArray<id<MPAdapterConfiguration>> * initializedAdapters) {
+            initializedNetworks = initializedAdapters;
+            dispatch_group_leave(initializationGroup);
+        }];
+        
+        // Once all of the asynchronous tasks have completed, notify the
+        // completion handler.
+        dispatch_group_notify(initializationGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+            MPLogEvent([MPLogEvent sdkInitializedWithNetworks:initializedNetworks]);
+            self.isSdkInitialized = YES;
+            if (completionBlock) {
+                completionBlock();
+            }
+        });
+    }
+}
+
+- (void)handlePersonalData
+{
+    [[MPConsentManager sharedManager] checkForIfaChange];
 }
 
 - (id<MPMediationSettingsProtocol>)globalMediationSettingsForClass:(Class)aClass
@@ -129,6 +187,145 @@
 - (void)disableViewability:(MPViewabilityOption)vendors
 {
     [MPViewabilityTracker disableViewability:vendors];
+}
+
+@end
+
+@implementation MoPub (Mediation)
+
+- (id<MPAdapterConfiguration>)adapterConfigurationNamed:(NSString *)className {
+    // No class name
+    if (className == nil) {
+        return nil;
+    }
+    
+    // Class doesn't exist.
+    Class classToFind = NSClassFromString(className);
+    if (classToFind == Nil) {
+        return nil;
+    }
+    
+    NSPredicate * predicate = [NSPredicate predicateWithFormat:@"self isKindOfClass: %@", classToFind];
+    NSArray * adapters = [MPMediationManager.sharedManager.adapters.allValues filteredArrayUsingPredicate:predicate];
+    return adapters.firstObject;
+}
+
+- (NSArray<NSString *> * _Nullable)availableAdapterClassNames {
+    NSMutableArray<NSString *> * adapterClassNames = [NSMutableArray arrayWithCapacity:MPMediationManager.sharedManager.adapters.count];
+    [MPMediationManager.sharedManager.adapters.allValues enumerateObjectsUsingBlock:^(id<MPAdapterConfiguration>  _Nonnull adapter, NSUInteger idx, BOOL * _Nonnull stop) {
+        NSString * className = NSStringFromClass(adapter.class);
+        if (className != nil) {
+            [adapterClassNames addObject:className];
+        }
+    }];
+    
+    return adapterClassNames;
+}
+
+- (void)clearCachedNetworks {
+    return [MPMediationManager.sharedManager clearCache];
+}
+
+@end
+
+@implementation MoPub (Consent)
+
+- (BOOL)shouldShowConsentDialog {
+    return [MPConsentManager sharedManager].isConsentNeeded;
+}
+
+- (BOOL)canCollectPersonalInfo {
+    return [MPConsentManager sharedManager].canCollectPersonalInfo;
+}
+
+- (MPBool)isGDPRApplicable {
+    return [MPConsentManager sharedManager].isGDPRApplicable;
+}
+
+- (void)forceGDPRApplicable {
+    [MPConsentManager sharedManager].forceIsGDPRApplicable = YES;
+}
+
+- (MPConsentStatus)currentConsentStatus {
+    return [MPConsentManager sharedManager].currentStatus;
+}
+
+- (NSString *)currentConsentIabVendorListFormat {
+    return [MPConsentManager sharedManager].iabVendorList;
+}
+
+- (NSString *)currentConsentPrivacyPolicyVersion {
+    return [MPConsentManager sharedManager].privacyPolicyVersion;
+}
+
+- (NSString *)currentConsentVendorListVersion {
+    return [MPConsentManager sharedManager].vendorListVersion;
+}
+
+- (NSString *)previouslyConsentedIabVendorListFormat {
+    return [MPConsentManager sharedManager].consentedIabVendorList;
+}
+
+- (NSString *)previouslyConsentedPrivacyPolicyVersion {
+    return [MPConsentManager sharedManager].consentedPrivacyPolicyVersion;
+}
+
+- (NSString *)previouslyConsentedVendorListVersion {
+    return [MPConsentManager sharedManager].consentedVendorListVersion;
+}
+
+- (void)loadConsentDialogWithCompletion:(void (^)(NSError * _Nullable))completion {
+    [[MPConsentManager sharedManager] loadConsentDialogWithCompletion:completion];
+}
+
+- (void)showConsentDialogFromViewController:(UIViewController *)viewController
+                                    didShow:(void (^ _Nullable)(void))didShow
+                                 didDismiss:(void (^ _Nullable)(void))didDismiss {
+    [[MPConsentManager sharedManager] showConsentDialogFromViewController:viewController
+                                                                  didShow:didShow
+                                                               didDismiss:didDismiss];
+}
+
+- (void)showConsentDialogFromViewController:(UIViewController *)viewController completion:(void (^ _Nullable)(void))completion {
+    [self showConsentDialogFromViewController:viewController
+                                      didShow:completion
+                                   didDismiss:nil];
+}
+
+- (BOOL)allowLegitimateInterest {
+    return [MPConsentManager sharedManager].allowLegitimateInterest;
+}
+
+- (void)setAllowLegitimateInterest:(BOOL)allowLegitimateInterest {
+    [MPConsentManager sharedManager].allowLegitimateInterest = allowLegitimateInterest;
+}
+
+- (BOOL)isConsentDialogReady {
+    return [MPConsentManager sharedManager].isConsentDialogLoaded;
+}
+
+- (void)revokeConsent {
+    [[MPConsentManager sharedManager] revokeConsent];
+}
+
+- (void)grantConsent {
+    [[MPConsentManager sharedManager] grantConsent];
+}
+
+- (NSURL *)currentConsentPrivacyPolicyUrl {
+    return [[MPConsentManager sharedManager] privacyPolicyUrl];
+}
+
+- (NSURL *)currentConsentPrivacyPolicyUrlWithISOLanguageCode:(NSString *)isoLanguageCode {
+    return [[MPConsentManager sharedManager] privacyPolicyUrlWithISOLanguageCode:isoLanguageCode];
+}
+
+- (NSURL *)currentConsentVendorListUrl {
+    return [[MPConsentManager sharedManager] vendorListUrl];
+}
+
+- (NSURL *)currentConsentVendorListUrlWithISOLanguageCode:(NSString *)isoLanguageCode {
+    return [[MPConsentManager sharedManager] vendorListUrlWithISOLanguageCode:isoLanguageCode];
 }
 
 @end
