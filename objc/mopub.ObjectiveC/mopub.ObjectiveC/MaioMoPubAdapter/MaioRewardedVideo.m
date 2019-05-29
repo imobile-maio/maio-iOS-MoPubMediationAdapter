@@ -24,22 +24,15 @@
 }
 
 - (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info {
-    // If GDPR is required do not initialize SDK
-    if ([MoPub sharedInstance].isGDPRApplicable == MPBoolYes) {
-        NSError *gdprError = [MaioError gdpr];
-        [self.delegate rewardedVideoDidFailToPlayForCustomEvent:self error:gdprError];
-        MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:gdprError], nil);
+    NSError* loadError = nil;
+    if (![self canRequestWithCustomEventInfo:info error:&loadError]) {
+        [self.delegate rewardedVideoDidFailToLoadAdForCustomEvent:self error:loadError];
+        MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:loadError], nil);
         return;
     }
 
     MaioManager *manager = [MaioManager sharedInstance];
     MaioCredentials *credentials = [MaioCredentials credentialsFromDictionary:info];
-    if (!credentials) {
-        NSError *credentialError = [MaioError credentials];
-        [self.delegate rewardedVideoDidFailToLoadAdForCustomEvent:self error:credentialError];
-        MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:credentialError], nil);
-        return;
-    }
     _credentials = credentials;
     MPLogAdEvent([MPLogEvent adLoadAttemptForAdapter:NSStringFromClass(self.class) dspCreativeId:nil dspName:nil], _credentials.zoneId);
 
@@ -78,6 +71,27 @@
 - (void)presentRewardedVideoFromViewController:(UIViewController *)viewController {
     MPLogAdEvent([MPLogEvent adShowAttemptForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     [[MaioManager sharedInstance] showAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId];
+}
+
+- (BOOL)canRequestWithCustomEventInfo:(NSDictionary*)info error:(NSError**)errorPointer {
+
+    // If GDPR is required do not initialize SDK
+    if ([MoPub sharedInstance].isGDPRApplicable == MPBoolYes) {
+        if (errorPointer) {
+            *errorPointer = [MaioError gdpr];
+        }
+        return NO;
+    }
+
+    MaioCredentials *credentials = [MaioCredentials credentialsFromDictionary:info];
+    if (!credentials) {
+        if (errorPointer) {
+            *errorPointer = [MaioError credentials];
+        }
+        return NO;
+    }
+
+    return YES;
 }
 
 #pragma mark - MaioDelegate
