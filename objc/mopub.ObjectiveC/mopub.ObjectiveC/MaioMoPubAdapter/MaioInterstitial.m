@@ -18,22 +18,14 @@
 }
 
 - (void)requestInterstitialWithCustomEventInfo:(NSDictionary *)info {
-    // If GDPR is required do not initialize SDK
-    if ([MoPub sharedInstance].isGDPRApplicable == MPBoolYes) {
-        NSError *gdprError = [MaioError gdpr];
-        [self.delegate interstitialCustomEvent:self didFailToLoadAdWithError:gdprError];
-        MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:gdprError], nil);
+    NSError *loadError = nil;
+    if (![self canRequestWithCustomEventInfo:info error:&loadError]) {
+        [self.delegate interstitialCustomEvent:self didFailToLoadAdWithError:loadError];
+        MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:loadError], nil);
         return;
     }
 
     _credentials = [MaioCredentials credentialsFromDictionary:info];
-    if (!_credentials) {
-        NSError *credentialError = [MaioError credentials];
-        [self.delegate interstitialCustomEvent:self
-                      didFailToLoadAdWithError:credentialError];
-        MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:credentialError], nil);
-        return;
-    }
 
     MPLogAdEvent([MPLogEvent adLoadAttemptForAdapter:NSStringFromClass(self.class) dspCreativeId:nil dspName:nil], _credentials.zoneId);
 
@@ -64,6 +56,27 @@
     MaioManager *manager = [MaioManager sharedInstance];
     if (![manager canShowAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId]) return;
     [manager showAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId];
+}
+
+- (BOOL)canRequestWithCustomEventInfo:(NSDictionary*)info error:(NSError**)errorPointer {
+
+    // If GDPR is required do not initialize SDK
+    if ([MoPub sharedInstance].isGDPRApplicable == MPBoolYes) {
+        if (errorPointer) {
+            *errorPointer = [MaioError gdpr];
+        }
+        return NO;
+    }
+
+    MaioCredentials *credentials = [MaioCredentials credentialsFromDictionary:info];
+    if (!credentials) {
+        if (errorPointer) {
+            *errorPointer = [MaioError credentials];
+        }
+        return NO;
+    }
+
+    return YES;
 }
 
 #pragma mark - MaioDelegate
