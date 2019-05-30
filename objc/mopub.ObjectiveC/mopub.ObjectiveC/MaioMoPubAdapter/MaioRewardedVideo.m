@@ -53,6 +53,12 @@
         [manager addDelegate:self forMediaId:_credentials.mediaId];
     }
 
+    if ([manager isAdStockOut:_credentials.zoneId]) {
+        NSError *adStockOutError = [MaioError loadFailedWithReason:MaioFailReasonAdStockOut];
+        [self.delegate rewardedVideoDidFailToLoadAdForCustomEvent:self error:adStockOutError];
+        MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:adStockOutError], nil);
+    }
+
     if ([manager canShowAtMediaId:credentials.mediaId zoneId:credentials.zoneId]) {
         [self.delegate rewardedVideoDidLoadAdForCustomEvent:self];
         MPLogAdEvent([MPLogEvent adLoadSuccessForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
