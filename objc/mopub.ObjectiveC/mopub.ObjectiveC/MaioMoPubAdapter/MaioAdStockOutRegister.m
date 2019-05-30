@@ -31,4 +31,23 @@
     return [self.zoneIds containsObject:zoneId];
 }
 
+#pragma mark - MaioDelegate
+
+-(void)maioDidFail:(NSString *)zoneId reason:(MaioFailReason)reason {
+    if (reason != MaioFailReasonAdStockOut) {
+        return;
+    }
+    [self.zoneIds addObject:zoneId];
+}
+
+-(void)maioDidChangeCanShow:(NSString *)zoneId newValue:(BOOL)newValue {
+    if (newValue != YES) {
+        return;
+    }
+    if (![self.zoneIds containsObject:zoneId]) {
+        return;
+    }
+    [self.zoneIds removeObject:zoneId];
+}
+
 @end
