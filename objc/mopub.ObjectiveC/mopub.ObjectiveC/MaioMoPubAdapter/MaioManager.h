@@ -11,6 +11,8 @@
 @interface MaioManager : NSObject <MaioDelegate>
 + (MaioManager *)sharedInstance;
 
++ (BOOL)canRequestWithCustomEventInfo:(NSDictionary*)info error:(NSError**)errorPointer;
+
 - (void)startWithMediaId:(NSString *)mediaId delegate:(id <MaioDelegate>)delegate;
 
 - (BOOL)isInitialized:(NSString *)mediaId;
