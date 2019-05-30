@@ -28,7 +28,9 @@
     if (!zoneId) {
         return NO;
     }
-    return [self.zoneIds containsObject:zoneId];
+    @synchronized (self.zoneIds) {
+        return [self.zoneIds containsObject:zoneId];
+    }
 }
 
 #pragma mark - MaioDelegate
@@ -37,17 +39,21 @@
     if (reason != MaioFailReasonAdStockOut) {
         return;
     }
-    [self.zoneIds addObject:zoneId];
+    @synchronized (self.zoneIds) {
+        [self.zoneIds addObject:zoneId];
+    }
 }
 
 -(void)maioDidChangeCanShow:(NSString *)zoneId newValue:(BOOL)newValue {
     if (newValue != YES) {
         return;
     }
-    if (![self.zoneIds containsObject:zoneId]) {
-        return;
+    @synchronized (self.zoneIds) {
+        if (![self.zoneIds containsObject:zoneId]) {
+            return;
+        }
+        [self.zoneIds removeObject:zoneId];
     }
-    [self.zoneIds removeObject:zoneId];
 }
 
 @end
