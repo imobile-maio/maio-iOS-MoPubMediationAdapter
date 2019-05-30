@@ -7,6 +7,7 @@
 
 #import "MaioManager.h"
 #import <Maio/Maio.h>
+#import "MaioAdStockOutRegister.h"
 
 @interface MaioGeneralDelegate : NSObject <MaioDelegate>
 @end
@@ -89,6 +90,10 @@
 
 @end
 
+@interface MaioManager ()
+@property (nonatomic) MaioAdStockOutRegister *adStockOutRegister;
+@end
+
 @implementation MaioManager {
     NSMutableDictionary<NSString *, MaioInstance *> *_references;
     NSMutableDictionary<NSString *, MaioGeneralDelegate *> *_generalDelegateReferences;
@@ -99,6 +104,7 @@
     if (self) {
         _references = [NSMutableDictionary dictionary];
         _generalDelegateReferences = [NSMutableDictionary dictionary];
+        _adStockOutRegister = [MaioAdStockOutRegister new];
     }
     return self;
 }
@@ -121,6 +127,7 @@
     }
 
     MaioGeneralDelegate *generalDelegate = [[MaioGeneralDelegate alloc] initWithDelegate:delegate];
+    [generalDelegate addDelegate:self.adStockOutRegister];
     _generalDelegateReferences[mediaId] = generalDelegate;
     MaioInstance *maioInstance = [Maio startWithNonDefaultMediaId:mediaId delegate:generalDelegate];
     _references[mediaId] = maioInstance;
