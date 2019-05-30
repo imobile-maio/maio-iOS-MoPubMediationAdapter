@@ -125,6 +125,7 @@
 
     if (reason == MaioFailReasonVideoPlayback) {
         NSError *playbackError = [MaioError loadFailedWithReason:reason];
+        // MPInterstitialCustomEventDelegate has'nt didFailToPlayAdWithError
         [self.delegate interstitialCustomEvent:self didFailToLoadAdWithError:playbackError];
         MPLogAdEvent([MPLogEvent adShowFailedForAdapter:NSStringFromClass(self.class) error:playbackError], _credentials.zoneId);
         return;
