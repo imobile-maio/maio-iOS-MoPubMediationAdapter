@@ -137,6 +137,10 @@
     return _references[mediaId] != nil;
 }
 
+- (BOOL)isAdStockOut:(NSString *)zoneId {
+    return [self.adStockOutRegister hasRecordThatZoneId:zoneId];
+}
+
 - (void)addDelegate:(id <MaioDelegate>)delegate forMediaId:(NSString *)mediaId {
     if (!_references[mediaId]) {
         return;
