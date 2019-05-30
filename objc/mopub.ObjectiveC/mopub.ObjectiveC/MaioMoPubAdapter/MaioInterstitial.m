@@ -59,24 +59,7 @@
 }
 
 - (BOOL)canRequestWithCustomEventInfo:(NSDictionary*)info error:(NSError**)errorPointer {
-
-    // If GDPR is required do not initialize SDK
-    if ([MoPub sharedInstance].isGDPRApplicable == MPBoolYes) {
-        if (errorPointer) {
-            *errorPointer = [MaioError gdpr];
-        }
-        return NO;
-    }
-
-    MaioCredentials *credentials = [MaioCredentials credentialsFromDictionary:info];
-    if (!credentials) {
-        if (errorPointer) {
-            *errorPointer = [MaioError credentials];
-        }
-        return NO;
-    }
-
-    return YES;
+    return [MaioManager canRequestWithCustomEventInfo:info error:errorPointer];
 }
 
 #pragma mark - MaioDelegate
