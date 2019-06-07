@@ -71,7 +71,11 @@
 }
 
 - (BOOL)hasAdAvailable {
-    return [[MaioManager sharedInstance] canShowAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId];
+    MaioManager *manager = [MaioManager sharedInstance];
+    if ([manager isAdStockOut:_credentials.zoneId]) {
+        return NO;
+    }
+    return [manager canShowAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId];
 }
 
 - (void)presentRewardedVideoFromViewController:(UIViewController *)viewController {
