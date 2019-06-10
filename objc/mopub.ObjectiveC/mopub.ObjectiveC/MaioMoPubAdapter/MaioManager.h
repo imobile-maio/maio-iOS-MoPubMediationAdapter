@@ -17,6 +17,8 @@
 
 - (BOOL)isInitialized:(NSString *)mediaId;
 
+- (BOOL)isAdStockOut:(NSString *)zoneId;
+
 - (BOOL)hasDelegate:(id <MaioDelegate>)delegate forMediaId:(NSString *)mediaId;
 
 - (BOOL)canShowAtMediaId:(NSString *)mediaId zoneId:(NSString *)zoneId;
