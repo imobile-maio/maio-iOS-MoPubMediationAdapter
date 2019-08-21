@@ -8,8 +8,8 @@
 #import "ViewController.h"
 #import "MaioAdapterConfiguration.h"
 
-#define AD_UNIT_ID_INTER @"81a6a7820dda490d98f013b4dc32f0a2"
-#define AD_UNIT_ID_REWARD @"a821b308f35542b781f58d2043dc8c44"
+#define AD_UNIT_ID_INTER @"SET_YOUR_AD_UNIT_ID"
+#define AD_UNIT_ID_REWARD @"SET_YOUR_AD_UNIT_ID"
 
 @interface ViewController ()
 - (IBAction)loadAdButton:(UIButton *)sender;
