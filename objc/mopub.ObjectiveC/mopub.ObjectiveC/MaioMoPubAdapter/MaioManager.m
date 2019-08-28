@@ -36,7 +36,7 @@
 }
 
 - (void)maioDidInitialize {
-    for (id <MaioDelegate> delegate in _delegates) {
+    for (id <MaioDelegate> delegate in _delegates.allObjects) {
         if ([delegate respondsToSelector:@selector(maioDidInitialize)]) {
             [delegate maioDidInitialize];
         }
@@ -44,7 +44,7 @@
 }
 
 - (void)maioDidClickAd:(NSString *)zoneId {
-    for (id <MaioDelegate> delegate in _delegates) {
+    for (id <MaioDelegate> delegate in _delegates.allObjects) {
         if ([delegate respondsToSelector:@selector(maioDidClickAd:)]) {
             [delegate maioDidClickAd:zoneId];
         }
@@ -52,7 +52,7 @@
 }
 
 - (void)maioDidCloseAd:(NSString *)zoneId {
-    for (id <MaioDelegate> delegate in _delegates) {
+    for (id <MaioDelegate> delegate in _delegates.allObjects) {
         if ([delegate respondsToSelector:@selector(maioDidCloseAd:)]) {
             [delegate maioDidCloseAd:zoneId];
         }
@@ -60,7 +60,7 @@
 }
 
 - (void)maioWillStartAd:(NSString *)zoneId {
-    for (id <MaioDelegate> delegate in _delegates) {
+    for (id <MaioDelegate> delegate in _delegates.allObjects) {
         if ([delegate respondsToSelector:@selector(maioWillStartAd:)]) {
             [delegate maioWillStartAd:zoneId];
         }
@@ -68,7 +68,7 @@
 }
 
 - (void)maioDidFail:(NSString *)zoneId reason:(MaioFailReason)reason {
-    for (id <MaioDelegate> delegate in _delegates) {
+    for (id <MaioDelegate> delegate in _delegates.allObjects) {
         if ([delegate respondsToSelector:@selector(maioDidFail:reason:)]) {
             [delegate maioDidFail:zoneId reason:reason];
         }
@@ -76,7 +76,7 @@
 }
 
 - (void)maioDidChangeCanShow:(NSString *)zoneId newValue:(BOOL)newValue {
-    for (id <MaioDelegate> delegate in _delegates) {
+    for (id <MaioDelegate> delegate in _delegates.allObjects) {
         if ([delegate respondsToSelector:@selector(maioDidChangeCanShow:newValue:)]) {
             [delegate maioDidChangeCanShow:zoneId newValue:newValue];
         }
@@ -84,7 +84,7 @@
 }
 
 - (void)maioDidFinishAd:(NSString *)zoneId playtime:(NSInteger)playtime skipped:(BOOL)skipped rewardParam:(NSString *)rewardParam {
-    for (id <MaioDelegate> delegate in _delegates) {
+    for (id <MaioDelegate> delegate in _delegates.allObjects) {
         if ([delegate respondsToSelector:@selector(maioDidFinishAd:playtime:skipped:rewardParam:)]) {
             [delegate maioDidFinishAd:zoneId playtime:playtime skipped:skipped rewardParam:rewardParam];
         }
