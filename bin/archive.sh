@@ -7,12 +7,16 @@ readonly ADAPTER_NAME='MaioMoPubAdapter'
 # echo $ADAPTER_ROOT 1>&2
 
 show_help() {
-    echo "Usage: ${BASH_SOURCE:-$0} [-d dir] <commit>..." 1>&2
+    echo "Usage: ${BASH_SOURCE:-$0} [-hq] [-d dir]  <commit>..." 1>&2
+    echo "    -d  Output directory" 1>&2
+    echo "    -h  Print this help" 1>&2
+    echo "    -v  Be verbose" 1>&2
 }
 
 destination=$(pwd)
+flag_quiet='-q'
 
-while getopts d:h OPT
+while getopts d:vh OPT
 do
     case "$OPT" in
         d)
@@ -21,6 +25,9 @@ do
         h)
             show_help
             exit 0
+            ;;
+        v)
+            flag_quiet=''
             ;;
         \?)
             show_help
@@ -41,12 +48,12 @@ if [ $# -eq 0 ]; then
 fi
 
 tempDir=$(mktemp -d -t 'archive-mopub-adapter')
-git clone -l $DOC_ROOT $tempDir
+git clone -l $flag_quiet $DOC_ROOT $tempDir
 cd $tempDir;
 
 for commit in "$@"; do
-    git checkout $commit
-    zip -r $destination/"${ADAPTER_NAME}_${commit}.zip" $ADAPTER_ROOT
+    git checkout $flag_quiet $commit
+    zip $flag_quiet -r $destination/"${ADAPTER_NAME}_${commit}.zip" $ADAPTER_ROOT
 done
 
 # cleanup
