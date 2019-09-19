@@ -1,10 +1,10 @@
 #!/bin/bash
 readonly DOC_ROOT=$(cd $(dirname ${BASH_SOURCE:-$0})/.. ; pwd)
-readonly ADAPTER_ROOT="$DOC_ROOT/objc/mopub.ObjectiveC/mopub.ObjectiveC/MaioMoPubAdapter"
 readonly ADAPTER_NAME='MaioMoPubAdapter'
+readonly ADAPTER_PATH="objc/mopub.ObjectiveC/mopub.ObjectiveC/$ADAPTER_NAME"
 
 # echo $DOC_ROOT 1>&2
-# echo $ADAPTER_ROOT 1>&2
+# echo $ADAPTER_PATH 1>&2
 
 show_help() {
     echo "Usage: ${BASH_SOURCE:-$0} [-hq] [-d dir]  <commit>..." 1>&2
@@ -49,11 +49,12 @@ fi
 
 tempDir=$(mktemp -d -t 'archive-mopub-adapter')
 git clone -l $flag_quiet $DOC_ROOT $tempDir
-cd $tempDir;
 
 for commit in "$@"; do
+    cd $tempDir;
     git checkout $flag_quiet $commit
-    zip $flag_quiet -r $destination/"${ADAPTER_NAME}_${commit}.zip" $ADAPTER_ROOT
+    cd $tempDir/$ADAPTER_PATH/..
+    zip $flag_quiet -r $destination/"${ADAPTER_NAME}_${commit}.zip" ./${ADAPTER_NAME}
 done
 
 # cleanup
