@@ -33,14 +33,21 @@ done
 # drop argument of option
 shift $(($OPTIND - 1))
 
+# safety
 if [ $# -eq 0 ]; then
     echo "argument not found." 1>&2
     show_help
     exit 1
 fi
 
+tempDir=$(mktemp -d -t 'archive-mopub-adapter')
+git clone -l $DOC_ROOT $tempDir
+cd $tempDir;
+
 for commit in "$@"; do
-    cd $DOC_ROOT;
     git checkout $commit
     zip -r $destination/"${ADAPTER_NAME}_${commit}.zip" $ADAPTER_ROOT
 done
+
+# cleanup
+rm -rf $tempDir
