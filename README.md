@@ -39,3 +39,7 @@
     - For detailed instructions, see [`GetStarted`](https://github.com/imobile-maio/maio-iOS-SDK/wiki/Get-Started-(EN))
 1. Go to the [release page](https://github.com/imobile-maio/maio-iOS-MoPubMediationAdapter/releases) and download the newest `MaioMoPubAdapter_v*.*.*.zip`.
 1. Copy the contents of `MaioMoPubAdapter_v*.*.*.zip` to your project.
+
+## GDPR
+
+Maio does not currently support GDPR so setting `[MoPub forceGDPRApplicable]` will stop you from receiving maio ads.
