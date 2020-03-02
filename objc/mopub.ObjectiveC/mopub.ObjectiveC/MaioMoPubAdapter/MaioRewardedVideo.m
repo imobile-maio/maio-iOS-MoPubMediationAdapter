@@ -24,6 +24,9 @@
 }
 
 - (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info {
+    [self requestRewardedVideoWithCustomEventInfo:info adMarkup:nil];
+}
+- (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup {
     NSError* loadError = nil;
     if (![self canRequestWithCustomEventInfo:info error:&loadError]) {
         [self.delegate rewardedVideoDidFailToLoadAdForCustomEvent:self error:loadError];
