@@ -2005,6 +2005,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/mopub.ObjectiveC/MoPubSDK/Viewability/Avid",
 				);
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.maio.mopub-ObjectiveC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -2029,6 +2030,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/mopub.ObjectiveC/MoPubSDK/Viewability/Avid",
 				);
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.maio.mopub-ObjectiveC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
