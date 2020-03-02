@@ -14,6 +14,7 @@
 #import "MPAdImpressionTimer.h"
 #import "MPAdTargeting.h"
 #import "MPAdView.h"
+#import "MPAdViewDelegate.h"
 #import "MPBannerCustomEvent.h"
 #import "MPBannerCustomEventDelegate.h"
 #import "MPBaseAdapterConfiguration.h"
@@ -22,15 +23,21 @@
 #import "MPConsentChangedReason.h"
 #import "MPConsentError.h"
 #import "MPConsentStatus.h"
+#import "MPEngineInfo.h"
 #import "MPError.h"
 #import "MPGlobal.h"
 #import "MPIdentityProvider.h"
+#import "MPImpressionData.h"
+#import "MPImpressionTrackedNotification.h"
 #import "MPInterstitialAdController.h"
+#import "MPInterstitialAdControllerDelegate.h"
 #import "MPInterstitialCustomEvent.h"
 #import "MPInterstitialCustomEventDelegate.h"
 #import "MPLogging.h"
 #import "MPBLogLevel.h"
 #import "MPMediationSettingsProtocol.h"
+#import "MPMoPubAd.h"
+#import "MPMoPubAdPlacer.h"
 #import "MPMoPubConfiguration.h"
 #import "MPRealTimeTimer.h"
 #import "MPRewardedVideo.h"
@@ -53,7 +60,9 @@
 #import "MPNativeView.h"
 #import "MPNativeAdUtils.h"
 #import "MPCollectionViewAdPlacer.h"
+#import "MPCollectionViewAdPlacerDelegate.h"
 #import "MPTableViewAdPlacer.h"
+#import "MPTableViewAdPlacerDelegate.h"
 #import "MPClientAdPositioning.h"
 #import "MPServerAdPositioning.h"
 #import "MPNativeAdDelegate.h"
@@ -67,6 +76,7 @@
 #import "MOPUBNativeVideoAdRenderer.h"
 #import "MPNativeAdRenderingImageLoader.h"
 #import "MPStreamAdPlacer.h"
+#import "MPStreamAdPlacerDelegate.h"
 #endif
 
 // Import these frameworks for module support.
@@ -125,9 +135,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic) BOOL frequencyCappingIdUsageEnabled;
 
 /**
- * Forces the usage of WKWebView (if able).
+ * Forces the usage of @c WKWebView.
+ *
+ * Deprecated: @c WKWebView is always used. No need to force it any more. Calling this method will have no effect.
  */
-@property (nonatomic, assign) BOOL forceWKWebView;
+@property (nonatomic, assign) BOOL forceWKWebView __attribute((deprecated("WKWebView is always used. No need to force it any more.")));
 
 /**
  * SDK log level. The default value is `MPBLogLevelNone`.
@@ -177,6 +189,12 @@ NS_ASSUME_NONNULL_BEGIN
  * @param vendors The viewability vendor(s) to be disabled. This is a bitmask value; ORing vendors together is okay.
  */
 - (void)disableViewability:(MPViewabilityOption)vendors;
+
+/**
+ Sets the engine that is using this MoPub SDK.
+ @param info Engine information.
+ */
+- (void)setEngineInformation:(MPEngineInfo *)info;
 
 @end
 

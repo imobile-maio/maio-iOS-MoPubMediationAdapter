@@ -19,6 +19,7 @@
 #import "MPInterstitialAdManagerDelegate.h"
 #import "MPLogging.h"
 #import "MPError.h"
+#import "MPStopwatch.h"
 #import "NSMutableArray+MPAdditions.h"
 #import "NSDate+MPAdditions.h"
 #import "NSError+MPAdditions.h"
@@ -31,8 +32,9 @@
 @property (nonatomic, strong) MPAdServerCommunicator *communicator;
 @property (nonatomic, strong) MPAdConfiguration *requestingConfiguration;
 @property (nonatomic, strong) NSMutableArray<MPAdConfiguration *> *remainingConfigurations;
-@property (nonatomic, assign) NSTimeInterval adapterLoadStartTimestamp;
+@property (nonatomic, strong) MPStopwatch *loadStopwatch;
 @property (nonatomic, strong) MPAdTargeting * targeting;
+@property (nonatomic, strong) NSURL *mostRecentlyLoadedURL;  // ADF-4286: avoid infinite ad reloads
 
 - (void)setUpAdapterWithConfiguration:(MPAdConfiguration *)configuration;
 
@@ -42,19 +44,14 @@
 
 @implementation MPInterstitialAdManager
 
-@synthesize loading = _loading;
-@synthesize ready = _ready;
-@synthesize delegate = _delegate;
-@synthesize communicator = _communicator;
-@synthesize adapter = _adapter;
-@synthesize requestingConfiguration = _requestingConfiguration;
-
 - (id)initWithDelegate:(id<MPInterstitialAdManagerDelegate>)delegate
 {
     self = [super init];
     if (self) {
         self.communicator = [[MPAdServerCommunicator alloc] initWithDelegate:self];
         self.delegate = delegate;
+        
+        _loadStopwatch = MPStopwatch.new;
     }
     return self;
 }
@@ -85,6 +82,7 @@
     }
 
     self.loading = YES;
+    self.mostRecentlyLoadedURL = URL;
     [self.communicator loadURL:URL];
 }
 
@@ -97,10 +95,7 @@
         [self.delegate managerDidLoadInterstitial:self];
     } else {
         self.targeting = targeting;
-        [self loadAdWithURL:[MPAdServerURLBuilder URLWithAdUnitID:ID
-                                                         keywords:targeting.keywords
-                                                 userDataKeywords:targeting.userDataKeywords
-                                                         location:targeting.location]];
+        [self loadAdWithURL:[MPAdServerURLBuilder URLWithAdUnitID:ID targeting:targeting]];
     }
 }
 
@@ -151,7 +146,7 @@
 
 - (void)fetchAdWithConfiguration:(MPAdConfiguration *)configuration
 {
-    MPLogInfo(@"Interstitial ad view is fetching ad network type: %@", configuration.networkType);
+    MPLogInfo(@"Interstitial ad view is fetching ad type: %@", configuration.adType);
 
     if (configuration.adUnitWarmingUp) {
         MPLogInfo(kMPWarmingUpErrorLogFormatWithAdUnitID, self.delegate.interstitialAdController.adUnitId);
@@ -160,7 +155,7 @@
         return;
     }
     
-    if ([configuration.networkType isEqualToString:kAdTypeClear]) {
+    if ([configuration.adType isEqualToString:kAdTypeClear]) {
         MPLogInfo(kMPClearErrorLogFormatWithAdUnitID, self.delegate.interstitialAdController.adUnitId);
         self.loading = NO;
         [self.delegate manager:self didFailToLoadInterstitialWithError:[NSError errorWithCode:MOPUBErrorNoInventory]];
@@ -178,13 +173,13 @@
     [self.delegate manager:self didFailToLoadInterstitialWithError:error];
 }
 
-- (void)setUpAdapterWithConfiguration:(MPAdConfiguration *)configuration;
+- (void)setUpAdapterWithConfiguration:(MPAdConfiguration *)configuration
 {
     // Notify Ad Server of the adapter load. This is fire and forget.
     [self.communicator sendBeforeLoadUrlWithConfiguration:configuration];
     
-    // Record the start time of the adapter load.
-    self.adapterLoadStartTimestamp = NSDate.now.timeIntervalSince1970;
+    // Start the stopwatch for the adapter load.
+    [self.loadStopwatch start];
     
     if (configuration.customEventClass == nil) {
         [self adapter:nil didFailToLoadAdWithError:nil];
@@ -196,11 +191,11 @@
     [self.adapter _getAdWithConfiguration:configuration targeting:self.targeting];
 }
 
-- (MPAdType)adTypeForAdServerCommunicator:(MPAdServerCommunicator *)adServerCommunicator {
-    return MPAdTypeFullscreen;
+- (BOOL)isFullscreenAd {
+    return YES;
 }
 
-- (NSString *)adUnitIDForAdServerCommunicator:(MPAdServerCommunicator *)adServerCommunicator {
+- (NSString *)adUnitId {
     return [self.delegate adUnitId];
 }
 
@@ -213,7 +208,7 @@
     self.loading = NO;
     
     // Record the end of the adapter load and send off the fire and forget after-load-url tracker.
-    NSTimeInterval duration = NSDate.now.timeIntervalSince1970 - self.adapterLoadStartTimestamp;
+    NSTimeInterval duration = [self.loadStopwatch stop];
     [self.communicator sendAfterLoadUrlWithConfiguration:self.requestingConfiguration adapterLoadDuration:duration adapterLoadResult:MPAfterLoadResultAdLoaded];
     
     MPLogAdEvent(MPLogEvent.adDidLoad, self.delegate.interstitialAdController.adUnitId);
@@ -224,7 +219,7 @@
 {
     // Record the end of the adapter load and send off the fire and forget after-load-url tracker
     // with the appropriate error code result.
-    NSTimeInterval duration = NSDate.now.timeIntervalSince1970 - self.adapterLoadStartTimestamp;
+    NSTimeInterval duration = [self.loadStopwatch stop];
     MPAfterLoadResult result = (error.isAdRequestTimedOutError ? MPAfterLoadResultTimeout : (adapter == nil ? MPAfterLoadResultMissingAdapter : MPAfterLoadResultError));
     [self.communicator sendAfterLoadUrlWithConfiguration:self.requestingConfiguration adapterLoadDuration:duration adapterLoadResult:result];
     
@@ -234,7 +229,8 @@
         [self fetchAdWithConfiguration:self.requestingConfiguration];
     }
     // No more configurations to try. Send new request to Ads server to get more Ads.
-    else if (self.requestingConfiguration.nextURL != nil) {
+    else if (self.requestingConfiguration.nextURL != nil
+             && [self.requestingConfiguration.nextURL isEqual:self.mostRecentlyLoadedURL] == false) {
         self.ready = NO;
         self.loading = NO;
         [self loadAdWithURL:self.requestingConfiguration.nextURL];
@@ -293,6 +289,10 @@
 - (void)interstitialWillLeaveApplicationForAdapter:(MPBaseInterstitialAdapter *)adapter
 {
     MPLogAdEvent(MPLogEvent.adWillLeaveApplication, self.delegate.interstitialAdController.adUnitId);
+}
+
+- (void)interstitialDidReceiveImpressionEventForAdapter:(MPBaseInterstitialAdapter *)adapter {
+    [self.delegate interstitialAdManager:self didReceiveImpressionEventWithImpressionData:self.requestingConfiguration.impressionData];
 }
 
 @end

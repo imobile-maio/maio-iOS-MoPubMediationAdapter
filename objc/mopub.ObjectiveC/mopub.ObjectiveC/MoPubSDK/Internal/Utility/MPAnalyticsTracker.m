@@ -25,6 +25,10 @@
     return sharedTracker;
 }
 
+@end
+
+@implementation MPAnalyticsTracker (MPAnalyticsTracker)
+
 - (void)trackImpressionForConfiguration:(MPAdConfiguration *)configuration
 {
     // Take the @c impressionTrackingURLs array from @c configuration and use the @c sendTrackingRequestForURLs method
@@ -40,7 +44,7 @@
     [MPHTTPNetworkSession startTaskWithHttpRequest:request];
 }
 
-- (void)sendTrackingRequestForURLs:(NSArray *)URLs
+- (void)sendTrackingRequestForURLs:(NSArray<NSURL *> *)URLs
 {
     for (NSURL *URL in URLs) {
         MPURLRequest * trackingRequest = [[MPURLRequest alloc] initWithURL:URL];
