@@ -7,10 +7,13 @@
 //
 
 #import "MPInterstitialAdController.h"
+#import "MoPub+Utility.h"
 #import "MPAdTargeting.h"
-#import "MPLogging.h"
+#import "MPGlobal.h"
+#import "MPImpressionTrackedNotification.h"
 #import "MPInterstitialAdManager.h"
 #import "MPInterstitialAdManagerDelegate.h"
+#import "MPLogging.h"
 
 @interface MPInterstitialAdController () <MPInterstitialAdManagerDelegate>
 
@@ -64,7 +67,7 @@
 
 - (void)loadAd
 {
-    MPAdTargeting * targeting = [[MPAdTargeting alloc] init];
+    MPAdTargeting * targeting = [MPAdTargeting targetingWithCreativeSafeSize:MPApplicationFrame(YES).size];
     targeting.keywords = self.keywords;
     targeting.localExtras = self.localExtras;
     targeting.location = self.location;
@@ -172,6 +175,12 @@
     if ([self.delegate respondsToSelector:@selector(interstitialDidReceiveTapEvent:)]) {
         [self.delegate interstitialDidReceiveTapEvent:self];
     }
+}
+
+- (void)interstitialAdManager:(MPInterstitialAdManager *)manager didReceiveImpressionEventWithImpressionData:(MPImpressionData *)impressionData {
+    [MoPub sendImpressionDelegateAndNotificationFromAd:self
+                                              adUnitID:self.adUnitId
+                                        impressionData:impressionData];
 }
 
 + (NSMutableArray *)sharedInterstitialAdControllers

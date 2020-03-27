@@ -21,7 +21,6 @@
 #import "MPTimer.h"
 #import "NSHTTPURLResponse+MPAdditions.h"
 #import "NSURL+MPAdditions.h"
-#import "UIWebView+MPAdditions.h"
 #import "MPForceableOrientationProtocol.h"
 #import "MPAPIEndPoints.h"
 #import "MoPub.h"
@@ -53,7 +52,6 @@ static NSString *const kMRAIDCommandResize = @"resize";
 @property (nonatomic, assign) NSUInteger modalViewCount;
 @property (nonatomic, assign) BOOL isAppSuspended;
 @property (nonatomic, assign) MRAdViewState currentState;
-@property (nonatomic, assign) BOOL shouldUseUIWebView;
 // Track the original super view for when we move the ad view to the key window for a 1-part expand.
 @property (nonatomic, weak) UIView *originalSuperview;
 @property (nonatomic, assign) BOOL isViewable;
@@ -114,11 +112,11 @@ static NSString *const kMRAIDCommandResize = @"resize";
 
         _mraidDefaultAdFrame = adViewFrame;
 
-        _adPropertyUpdateTimer = [[MPCoreInstanceProvider sharedProvider] buildMPTimerWithTimeInterval:kAdPropertyUpdateTimerInterval
-                                                                                                target:self
-                                                                                              selector:@selector(updateMRAIDProperties)
-                                                                                               repeats:YES];
-        _adPropertyUpdateTimer.runLoopMode = NSRunLoopCommonModes;
+        _adPropertyUpdateTimer = [MPTimer timerWithTimeInterval:kAdPropertyUpdateTimerInterval
+                                                         target:self
+                                                       selector:@selector(updateMRAIDProperties)
+                                                        repeats:YES
+                                                    runLoopMode:NSRunLoopCommonModes];
 
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(viewEnteredBackground)
@@ -165,15 +163,13 @@ static NSString *const kMRAIDCommandResize = @"resize";
     self.isAdLoading = YES;
     self.adRequiresPrecaching = configuration.precacheRequired;
     self.isAdVastVideoPlayer = configuration.isVastVideoPlayer;
-    self.shouldUseUIWebView = self.isAdVastVideoPlayer;
 
-    self.mraidWebView = [self buildMRAIDWebViewWithFrame:self.mraidDefaultAdFrame
-                                          forceUIWebView:self.shouldUseUIWebView];
+    self.mraidWebView = [self buildMRAIDWebViewWithFrame:self.mraidDefaultAdFrame];
     self.mraidWebView.shouldConformToSafeArea = [self isInterstitialAd];
     
     self.mraidBridge = [[MRBridge alloc] initWithWebView:self.mraidWebView delegate:self];
     self.mraidAdView = [[MPClosableView alloc] initWithFrame:self.mraidDefaultAdFrame
-                                                     webView:self.mraidWebView
+                                                 contentView:self.mraidWebView
                                                     delegate:self];
     if (self.placementType == MRAdViewPlacementTypeInterstitial) {
         self.mraidAdView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -346,9 +342,9 @@ static NSString *const kMRAIDCommandResize = @"resize";
     return bridge;
 }
 
-- (MPWebView *)buildMRAIDWebViewWithFrame:(CGRect)frame forceUIWebView:(BOOL)forceUIWebView
+- (MPWebView *)buildMRAIDWebViewWithFrame:(CGRect)frame
 {
-    MPWebView *webView = [[MPWebView alloc] initWithFrame:frame forceUIWebView:forceUIWebView];
+    MPWebView *webView = [[MPWebView alloc] initWithFrame:frame];
     webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     webView.backgroundColor = [UIColor clearColor];
     webView.clipsToBounds = YES;
@@ -408,68 +404,82 @@ static NSString *const kMRAIDCommandResize = @"resize";
 
 #pragma mark - Resize Helpers
 
-- (CGRect)adjustedFrameForFrame:(CGRect)frame allowOffscreen:(BOOL)allowOffscreen
+/**
+ If the provided frame is not fully within the application safe area, to try to adjust it's origin so
+ that the provided frame can fit into the application safe area if possible.
+ 
+ Note: Only the origin is adjusted. If the size doesn't fit, then the original frame is returned.
+ 
+ @param frame The frame to adjust.
+ @param applicationSafeArea The frame of application safe area.
+ @return The adjusted frame.
+ */
++ (CGRect)adjustedFrameForFrame:(CGRect)frame toFitIntoApplicationSafeArea:(CGRect)applicationSafeArea
 {
-    if (allowOffscreen) {
+    if (CGRectContainsRect(applicationSafeArea, frame)) {
         return frame;
-    }
-
-    CGRect applicationFrame = MPApplicationFrame(self.includeSafeAreaInsetsInCalculations);
-    CGFloat applicationWidth = CGRectGetWidth(applicationFrame);
-    CGFloat applicationHeight = CGRectGetHeight(applicationFrame);
-    CGFloat adFrameWidth = CGRectGetWidth(frame);
-    CGFloat adFrameHeight = CGRectGetHeight(frame);
-
-    //Checking that the ad's frame falls offscreen, and then it is smaller than the screen's bounds (so when
-    //moved onscreen, it will fit). If not, we bail out, and validation is done separately.
-    if (!CGRectContainsRect(applicationFrame, frame) && adFrameWidth <= applicationWidth && adFrameHeight <= applicationHeight) {
-
-        CGFloat applicationMinX = CGRectGetMinX(applicationFrame);
-        CGFloat applicationMaxX = CGRectGetMaxX(applicationFrame);
-        CGFloat adFrameMinX = CGRectGetMinX(frame);
-        CGFloat adFrameMaxX = CGRectGetMaxX(frame);
-
-        if (adFrameMinX < applicationMinX) {
-            frame.origin.x += applicationMinX - adFrameMinX;
-        } else if (adFrameMaxX > applicationMaxX) {
-            frame.origin.x -= adFrameMaxX - applicationMaxX;
+    } else if (CGRectGetWidth(frame) <= CGRectGetWidth(applicationSafeArea)
+               && CGRectGetHeight(frame) <= CGRectGetHeight(applicationSafeArea)) {
+        // given the size is fitting, we only need to move the frame by changing its origin
+        if (CGRectGetMinX(frame) < CGRectGetMinX(applicationSafeArea)) {
+            frame.origin.x = CGRectGetMinX(applicationSafeArea);
+        } else if (CGRectGetMaxX(applicationSafeArea) < CGRectGetMaxX(frame)) {
+            frame.origin.x = CGRectGetMaxX(applicationSafeArea) - CGRectGetWidth(frame);
         }
-
-        CGFloat applicationMinY = CGRectGetMinY(applicationFrame);
-        CGFloat applicationMaxY = CGRectGetMaxY(applicationFrame);
-        CGFloat adFrameMinY = CGRectGetMinY(frame);
-        CGFloat adFrameMaxY = CGRectGetMaxY(frame);
-
-        if (adFrameMinY < applicationMinY) {
-            frame.origin.y += applicationMinY - adFrameMinY;
-        } else if (adFrameMaxY > applicationMaxY) {
-            frame.origin.y -= adFrameMaxY - applicationMaxY;
+        
+        if (CGRectGetMinY(frame) < CGRectGetMinY(applicationSafeArea)) {
+            frame.origin.y = CGRectGetMinY(applicationSafeArea);
+        } else if (CGRectGetMaxY(applicationSafeArea) < CGRectGetMaxY(frame)) {
+            frame.origin.y = CGRectGetMaxY(applicationSafeArea) - CGRectGetHeight(frame);
         }
     }
 
     return frame;
 }
 
-- (BOOL)isValidResizeFrame:(CGRect)frame allowOffscreen:(BOOL)allowOffscreen
+/**
+ Check whether the provided @c frame is valid for a resized ad.
+ @param frame The ad frame to check
+ @param applicationSafeArea The safe area of this application
+ @param allowOffscreen Per MRAID spec https://www.iab.com/wp-content/uploads/2015/08/IAB_MRAID_v2_FINAL.pdf,
+ page 35, @c is for "whether or not it should allow the resized creative to be drawn fully/partially
+ offscreen".
+ @return @c YES if the provided @c frame is valid for a resized ad, and @c NO otherwise.
+ */
++ (BOOL)isValidResizeFrame:(CGRect)frame
+     inApplicationSafeArea:(CGRect)applicationSafeArea
+            allowOffscreen:(BOOL)allowOffscreen
 {
-    BOOL valid = YES;
-    if (!allowOffscreen && !CGRectContainsRect(MPApplicationFrame(self.includeSafeAreaInsetsInCalculations), frame)) {
-        valid = NO;
-    } else if (CGRectGetWidth(frame) < 50.0f || CGRectGetHeight(frame) < 50.0f) {
-        valid = NO;
+    if (CGRectGetWidth(frame) < kCloseRegionSize.width || CGRectGetHeight(frame) < kCloseRegionSize.height) {
+        /*
+         Per MRAID spec https://www.iab.com/wp-content/uploads/2015/08/IAB_MRAID_v2_FINAL.pdf, page 34,
+         "a resized ad must be at least 50x50 pixels, to ensure there is room on the resized creative
+         for the close event region."
+         */
+        return false;
+    } else {
+        if (allowOffscreen) {
+            return YES; // any frame with a valid size is valid, even off screen
+        } else {
+            return CGRectContainsRect(applicationSafeArea, frame);
+        }
     }
-
-    return valid;
 }
 
-- (BOOL)isValidResizeCloseButtonPlacement:(MPClosableViewCloseButtonLocation)closeButtonLocation inFrame:(CGRect)newFrame
-{
-    CGRect closeButtonFrameForResize = MPClosableViewCustomCloseButtonFrame(newFrame.size, closeButtonLocation);
-    //Manually calculating Button's Frame in the window (newFrame's soon-to-be superview) because newFrame is not
-    //part of the view hierarchy yet.
-    CGRect closeButtonFrameInWindow = CGRectOffset(closeButtonFrameForResize, CGRectGetMinX(newFrame), CGRectGetMinY(newFrame));
-
-    return CGRectContainsRect(MPApplicationFrame(self.includeSafeAreaInsetsInCalculations), closeButtonFrameInWindow);
+/**
+ Check whether the frame of Close button is valid.
+ @param closeButtonLocation The Close button location.
+ @param adFrame The ad frame that contains the Close button.
+ @param applicationSafeArea The safe area of this application.
+ @return @c YES if the frame of the Close button is valid, and @c NO otherwise.
+ */
++ (BOOL)isValidCloseButtonPlacement:(MPClosableViewCloseButtonLocation)closeButtonLocation
+                          inAdFrame:(CGRect)adFrame
+              inApplicationSafeArea:(CGRect)applicationSafeArea {
+    // Need to convert the corrdinate system of the Close button frame from "in the ad" to "in the window".
+    CGRect closeButtonFrameInAd = MPClosableViewCustomCloseButtonFrame(adFrame.size, closeButtonLocation);
+    CGRect closeButtonFrameInWindow = CGRectOffset(closeButtonFrameInAd, CGRectGetMinX(adFrame), CGRectGetMinY(adFrame));
+    return CGRectContainsRect(applicationSafeArea, closeButtonFrameInWindow);
 }
 
 - (MPClosableViewCloseButtonLocation)adCloseButtonLocationFromString:(NSString *)closeButtonLocationString
@@ -519,7 +529,6 @@ static NSString *const kMRAIDCommandResize = @"resize";
     view.frame = self.expandModalViewController.view.bounds;
     view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.expandModalViewController.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
-    [self.expandModalViewController hideStatusBar];
 
     [[self.delegate viewControllerForPresentingModalView] presentViewController:self.expandModalViewController
                                                                        animated:animated
@@ -591,8 +600,6 @@ static NSString *const kMRAIDCommandResize = @"resize";
     // they're in a transitional state.
     [self willBeginAnimatingAdSize];
 
-    // Tell the modal view controller to restore the state of the status bar back to what the application had it set to.
-    [self.expandModalViewController restoreStatusBarVisibility];
     __weak __typeof__(self) weakSelf = self;
     [self.expandModalViewController dismissViewControllerAnimated:YES completion:^{
         __typeof__(self) strongSelf = weakSelf;
@@ -753,7 +760,7 @@ static NSString *const kMRAIDCommandResize = @"resize";
     } else if (command == MPMoPubHostCommandFailLoad) {
         [self adDidFailToLoad];
     } else if (command == MPMoPubHostCommandRewardedVideoEnded) {
-        [self.delegate rewardedVideoEnded];
+        [self rewardedVideoEnded];
     } else {
         MPLogInfo(@"MRController - unsupported MoPub URL: %@", [url absoluteString]);
     }
@@ -838,12 +845,6 @@ static NSString *const kMRAIDCommandResize = @"resize";
     if (inSameOrientation) {
         fullScreenAdViewController.supportedOrientationMask = forceOrientationMask;
     } else {
-        // It doesn't seem possible to force orientation in iOS 7+. So we dismiss the current view controller and re-present it with the forced orientation.
-        // If it's an expanded ad, we need to restore the status bar visibility before we dismiss the current VC since we don't show the status bar in expanded state.
-        if (inExpandedState) {
-            [self.expandModalViewController restoreStatusBarVisibility];
-        }
-
         // Block our timer from updating properties while we force orientation on the view controller.
         [self willBeginAnimatingAdSize];
 
@@ -895,10 +896,10 @@ static NSString *const kMRAIDCommandResize = @"resize";
         // It doesn't matter what frame we use for the two-part expand. We'll overwrite it with a new frame when presenting the modal.
         CGRect twoPartFrame = self.mraidAdView.frame;
 
-        MPWebView *twoPartWebView = [self buildMRAIDWebViewWithFrame:twoPartFrame forceUIWebView:self.shouldUseUIWebView];
+        MPWebView *twoPartWebView = [self buildMRAIDWebViewWithFrame:twoPartFrame];
         self.mraidBridgeTwoPart = [[MRBridge alloc] initWithWebView:twoPartWebView delegate:self];
         self.mraidAdViewTwoPart = [[MPClosableView alloc] initWithFrame:twoPartFrame
-                                                                webView:twoPartWebView
+                                                            contentView:twoPartWebView
                                                                delegate:self];
         self.isAdLoading = YES;
 
@@ -950,15 +951,24 @@ static NSString *const kMRAIDCommandResize = @"resize";
         self.mraidDefaultAdFrameInKeyWindow = [self.mraidAdView.superview convertRect:self.mraidAdView.frame toView:MPKeyWindow().rootViewController.view];
     }
 
-    CGRect newFrame = CGRectMake(CGRectGetMinX(self.mraidDefaultAdFrameInKeyWindow) + offsetX, CGRectGetMinY(self.mraidDefaultAdFrameInKeyWindow) + offsetY, width, height);
-    newFrame = [self adjustedFrameForFrame:newFrame allowOffscreen:allowOffscreen];
-    
     MPClosableViewCloseButtonLocation closeButtonLocation = [self adCloseButtonLocationFromString:customClosePositionString];
-
-    if (![self isValidResizeFrame:newFrame allowOffscreen:allowOffscreen]) {
+    CGRect applicationSafeArea = MPApplicationFrame(self.includeSafeAreaInsetsInCalculations);
+    CGRect newFrame = CGRectMake(CGRectGetMinX(applicationSafeArea) + offsetX,
+                                 CGRectGetMinY(applicationSafeArea) + offsetY,
+                                 width,
+                                 height);
+    if (!allowOffscreen) { // if `allowOffscreen` is YES, the frame doesn't need to be adjusted
+        newFrame = [[self class] adjustedFrameForFrame:newFrame toFitIntoApplicationSafeArea:applicationSafeArea];
+    }
+    
+    if (![[self class] isValidResizeFrame:newFrame
+                    inApplicationSafeArea:applicationSafeArea
+                           allowOffscreen:allowOffscreen]) {
         [self.mraidBridge fireErrorEventForAction:kMRAIDCommandResize withMessage:@"Could not display desired frame in compliance with MRAID 2.0 specifications."];
-    } else if (![self isValidResizeCloseButtonPlacement:closeButtonLocation inFrame:newFrame]) {
-        [self.mraidBridge fireErrorEventForAction:kMRAIDCommandResize withMessage:@"Custom close event region is offscreen."];
+    } else if (![[self class] isValidCloseButtonPlacement:closeButtonLocation
+                                                inAdFrame:newFrame
+                                    inApplicationSafeArea:applicationSafeArea]) {
+        [self.mraidBridge fireErrorEventForAction:kMRAIDCommandResize withMessage:@"Custom close event region locates in invalid area."];
     } else {
         // Update the close button
         self.mraidAdView.closeButtonType = MPClosableViewCloseButtonTypeTappableWithoutImage;
@@ -1290,6 +1300,13 @@ static NSString *const kMRAIDCommandResize = @"resize";
 {
     if ([self.delegate respondsToSelector:@selector(adDidClose:)]) {
         [self.delegate adDidClose:self.mraidAdView];
+    }
+}
+
+- (void)rewardedVideoEnded
+{
+    if ([self.delegate respondsToSelector:@selector(rewardedVideoEnded)]) {
+        [self.delegate rewardedVideoEnded];
     }
 }
 

@@ -10,6 +10,7 @@
 #import "MPConsentDialogViewController.h"
 #import "MPGlobal.h"
 #import "MPWebView.h"
+#import "MoPub+Utility.h"
 
 typedef void(^MPConsentDialogViewControllerCompletion)(BOOL success, NSError *error);
 
@@ -48,6 +49,9 @@ static NSTimeInterval const kCloseButtonFadeInAfterSeconds = 10.0;
         
         // Initialize web view
         [self setUpWebView];
+        
+        // Ensure fullscreen presentation
+        self.modalPresentationStyle = UIModalPresentationFullScreen;
     }
     
     return self;
@@ -93,7 +97,7 @@ static NSTimeInterval const kCloseButtonFadeInAfterSeconds = 10.0;
 }
 
 - (void)setUpWebView {
-    self.webView = [[MPWebView alloc] initWithFrame:CGRectZero forceUIWebView:NO];
+    self.webView = [[MPWebView alloc] initWithFrame:CGRectZero];
     self.webView.delegate = self;
     self.webView.scrollView.bounces = NO;
     self.webView.backgroundColor = [UIColor whiteColor];
@@ -105,7 +109,7 @@ static NSTimeInterval const kCloseButtonFadeInAfterSeconds = 10.0;
     [self.view addSubview:self.webView];
     
     // Set up autolayout constraints on iOS 11+. This web view should always stay within the safe area.
-    if (@available(iOS 11.0, *)) {
+    if (@available(iOS 11, *)) {
         self.webView.translatesAutoresizingMaskIntoConstraints = NO;
         [NSLayoutConstraint activateConstraints:@[
                                                   [self.webView.topAnchor constraintEqualToAnchor:self.view.safeAreaLayoutGuide.topAnchor],
@@ -133,7 +137,7 @@ static NSTimeInterval const kCloseButtonFadeInAfterSeconds = 10.0;
                forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.closeButton];
     
-    if (@available(iOS 11.0, *)) {
+    if (@available(iOS 11, *)) {
         self.closeButton.translatesAutoresizingMaskIntoConstraints = NO;
         [NSLayoutConstraint activateConstraints:@[
                                                   [self.closeButton.widthAnchor constraintEqualToConstant:kCloseButtonDimension],
@@ -198,13 +202,13 @@ static NSTimeInterval const kCloseButtonFadeInAfterSeconds = 10.0;
     }
 }
 
-- (BOOL)webView:(MPWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
+- (BOOL)webView:(MPWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(WKNavigationType)navigationType {
     BOOL requestIsMoPubScheme = [request.URL.scheme isEqualToString:kMoPubScheme];
     BOOL requestIsMoPubHost = [request.URL.host isEqualToString:MPAPIEndpoints.baseHostname];
     
     // Kick to Safari if the URL is not of MoPub scheme or hostname
     if (!requestIsMoPubScheme && !requestIsMoPubHost) {
-        [[UIApplication sharedApplication] openURL:request.URL];
+        [MoPub openURL:request.URL];
         return NO;
     }
     

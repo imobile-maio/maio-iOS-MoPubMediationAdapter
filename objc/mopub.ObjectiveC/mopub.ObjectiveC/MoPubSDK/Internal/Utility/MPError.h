@@ -31,10 +31,13 @@ typedef enum {
     MOPUBErrorInvalidCustomEventClass,
     MOPUBErrorJSONSerializationFailed,
     MOPUBErrorUnableToParseAdResponse,
+    MOPUBErrorConsentDialogAlreadyShowing,
     MOPUBErrorNoConsentDialogLoaded,
     MOPUBErrorAdapterFailedToLoadAd,
     MOPUBErrorFullScreenAdAlreadyOnScreen,
     MOPUBErrorTooManyRequests,
+    MOPUBErrorFrameWidthNotSetForFlexibleSize,
+    MOPUBErrorFrameHeightNotSetForFlexibleSize,
 } MOPUBErrorCode;
 
 @interface NSError (MoPub)
@@ -45,6 +48,7 @@ typedef enum {
 @end
 
 @interface NSError (Initialization)
++ (instancetype)sdkMinimumOsVersion:(int)osVersion;
 + (instancetype)sdkInitializationInProgress;
 @end
 
@@ -58,9 +62,12 @@ typedef enum {
 + (instancetype)adResponseFailedToParseWithError:(NSError *)serializationError;
 + (instancetype)adResponsesNotFound;
 + (instancetype)fullscreenAdAlreadyOnScreen;
++ (instancetype)frameWidthNotSetForFlexibleSize;
++ (instancetype)frameHeightNotSetForFlexibleSize;
 @end
 
 @interface NSError (Consent)
++ (instancetype)consentDialogAlreadyShowing;
 + (instancetype)noConsentDialogLoaded;
 @end
 

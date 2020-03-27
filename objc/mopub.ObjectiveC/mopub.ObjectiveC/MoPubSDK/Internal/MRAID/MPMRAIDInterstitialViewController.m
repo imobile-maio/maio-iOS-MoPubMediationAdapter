@@ -118,15 +118,13 @@
     self.interstitialView.frame = self.view.bounds;
     self.interstitialView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self.view addSubview:self.interstitialView];
-    if (@available(iOS 9.0, *)) {
-        self.interstitialView.translatesAutoresizingMaskIntoConstraints = NO;
-        [NSLayoutConstraint activateConstraints:@[
-                                                  [self.interstitialView.topAnchor constraintEqualToAnchor:self.view.topAnchor],
-                                                  [self.interstitialView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
-                                                  [self.interstitialView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
-                                                  [self.interstitialView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
-                                                  ]];
-    }
+    self.interstitialView.translatesAutoresizingMaskIntoConstraints = NO;
+    [NSLayoutConstraint activateConstraints:@[
+                                              [self.interstitialView.topAnchor constraintEqualToAnchor:self.view.topAnchor],
+                                              [self.interstitialView.leadingAnchor constraintEqualToAnchor:self.view.leadingAnchor],
+                                              [self.interstitialView.trailingAnchor constraintEqualToAnchor:self.view.trailingAnchor],
+                                              [self.interstitialView.bottomAnchor constraintEqualToAnchor:self.view.bottomAnchor],
+                                              ]];
 
     if ([self.delegate respondsToSelector:@selector(interstitialDidLoadAd:)]) {
         [self.delegate interstitialDidLoadAd:self];
@@ -178,12 +176,7 @@
 
 #pragma mark - Orientation Handling
 
-// supportedInterfaceOrientations and shouldAutorotate are for ios 6, 7, and 8.
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= MP_IOS_9_0
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations
-#else
-- (NSUInteger)supportedInterfaceOrientations
-#endif
 {
     return ([[UIApplication sharedApplication] mp_supportsOrientationMask:self.supportedOrientationMask]) ? self.supportedOrientationMask : [super supportedInterfaceOrientations];
 }

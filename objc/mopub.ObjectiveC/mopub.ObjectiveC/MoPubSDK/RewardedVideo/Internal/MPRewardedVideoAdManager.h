@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "MPAdTargeting.h"
+#import "MPImpressionData.h"
 
 @class MPRewardedVideoReward;
 @protocol MPRewardedVideoAdManagerDelegate;
@@ -19,7 +20,7 @@
 @interface MPRewardedVideoAdManager : NSObject
 
 @property (nonatomic, weak) id<MPRewardedVideoAdManagerDelegate> delegate;
-@property (nonatomic, readonly) NSString *adUnitID;
+@property (nonatomic, readonly) NSString *adUnitId;
 @property (nonatomic, strong) NSArray *mediationSettings;
 @property (nonatomic, copy) NSString *customerId;
 @property (nonatomic, strong) MPAdTargeting *targeting;
@@ -88,6 +89,7 @@
 - (void)rewardedVideoWillDisappearForAdManager:(MPRewardedVideoAdManager *)manager;
 - (void)rewardedVideoDidDisappearForAdManager:(MPRewardedVideoAdManager *)manager;
 - (void)rewardedVideoDidReceiveTapEventForAdManager:(MPRewardedVideoAdManager *)manager;
+- (void)rewardedVideoAdManager:(MPRewardedVideoAdManager *)manager didReceiveImpressionEventWithImpressionData:(MPImpressionData *)impressionData;
 - (void)rewardedVideoWillLeaveApplicationForAdManager:(MPRewardedVideoAdManager *)manager;
 - (void)rewardedVideoShouldRewardUserForAdManager:(MPRewardedVideoAdManager *)manager reward:(MPRewardedVideoReward *)reward;
 

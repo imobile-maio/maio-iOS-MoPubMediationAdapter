@@ -10,7 +10,9 @@
 #import <SystemConfiguration/SystemConfiguration.h>
 #import <MobileCoreServices/MobileCoreServices.h>
 #import <StoreKit/StoreKit.h>
+#import <WebKit/WebKit.h>
 #import <sys/sysctl.h>
+#import <zlib.h>
 #if __IPHONE_OS_VERSION_MAX_ALLOWED > __IPHONE_5_0
 #import <AdSupport/AdSupport.h> // idfaの取得 用
 #endif
@@ -37,9 +39,16 @@ __attribute__((deprecated("Deprecated on Release build")))
 ;
 
 /// maio SDK からの通知を受け取るデリゲート
-+ (id<MaioDelegate>)delegate;
++ (id<MaioDelegate>)delegate __deprecated;
 /// maio SDK からの通知を受け取るデリゲートをセットします。
-+ (void)setDelegate:(id<MaioDelegate>)delegate;
++ (void)setDelegate:(id<MaioDelegate>)delegate __deprecated;
+/// maio SDK からの通知を受け取るデリゲートを追加します
++ (void)addDelegateObject:(id<MaioDelegate>)delegate;
+/// maio SDK から、追加済みのデリゲートを取り除きます
++ (void)removeDelegateObject:(id<MaioDelegate>)delegate;
+/// maio SDKにデリゲートが追加済みか
++ (BOOL)containsMaioDelegate:(id<MaioDelegate>)delegate;
+
 
 /**
  *  SDK のセットアップを開始します。
@@ -64,17 +73,29 @@ __attribute__((deprecated("Deprecated on Release build")))
 /**
  *  既定のゾーンの広告を表示します。
  */
-+ (void)show;
++ (void)show __deprecated;
 
 /**
  *  指定したゾーンの広告を表示します。
  *
  *  @param zoneId  広告を表示したいゾーンの識別子
  */
-+ (void)showAtZoneId:(NSString *)zoneId;
++ (void)showAtZoneId:(NSString *)zoneId __deprecated;
 
 
+/**
+ *  既定のゾーンの広告を表示します。
+ *
+ *  @param vc  広告を表示したいViewController
+ */
 + (void)showWithViewController:(UIViewController *)vc;
+
+/**
+ *  指定したゾーンの広告を表示します。
+ *
+ *  @param zoneId  広告を表示したいゾーンの識別子
+ *  @param vc  広告を表示したいViewController
+ */
 + (void)showAtZoneId:(NSString *)zoneEid vc:(UIViewController *)vc;
 
 + (MaioInstance *)startWithNonDefaultMediaId:(NSString *)mediaEid delegate:(id<MaioDelegate>)delegate;
@@ -87,6 +108,11 @@ __attribute__((deprecated("Deprecated on Release build")))
 @property (nonatomic, readonly) NSString *mediaId;
 @property (nonatomic) BOOL adTestMode;
 @property (nonatomic) id<MaioDelegate> delegate;
+
+- (void)addDelegateObject:(id<MaioDelegate>)delegate;
+- (void)removeDelegateObject:(id<MaioDelegate>)delegate;
+- (BOOL)containsDelegate:(id<MaioDelegate>)delegate;
+
 
 - (BOOL)canShow;
 - (BOOL)canShowAtZoneId:(NSString *)zoneId;

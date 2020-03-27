@@ -55,8 +55,11 @@ static NSString * const kCollectionViewAdPlacerReuseIdentifier = @"MPCollectionV
         _streamAdPlacer = [MPStreamAdPlacer placerWithViewController:controller adPositioning:positioning rendererConfigurations:rendererConfigurations];
         _streamAdPlacer.delegate = self;
 
-        _insertionTimer = [MPTimer timerWithTimeInterval:kUpdateVisibleCellsInterval target:self selector:@selector(updateVisibleCells) repeats:YES];
-        _insertionTimer.runLoopMode = NSRunLoopCommonModes;
+        _insertionTimer = [MPTimer timerWithTimeInterval:kUpdateVisibleCellsInterval
+                                                  target:self
+                                                selector:@selector(updateVisibleCells)
+                                                 repeats:YES
+                                             runLoopMode:NSRunLoopCommonModes];
         [_insertionTimer scheduleNow];
 
         _originalDataSource = collectionView.dataSource;
@@ -104,6 +107,12 @@ static NSString * const kCollectionViewAdPlacerReuseIdentifier = @"MPCollectionV
 
 - (void)adPlacer:(MPStreamAdPlacer *)adPlacer didLoadAdAtIndexPath:(NSIndexPath *)indexPath
 {
+    NSInteger sectionCount = [self.collectionView.dataSource numberOfSectionsInCollectionView:self.collectionView];
+    NSInteger rowCount = [self.collectionView.dataSource collectionView:self.collectionView numberOfItemsInSection:indexPath.section];
+    if (indexPath.section >= sectionCount || indexPath.row >= rowCount) {
+        return; // ignore out-of-range index path that cannot be added to the collection view
+    }
+    
     BOOL animationsWereEnabled = [UIView areAnimationsEnabled];
     //We only want to enable animations if the index path is before or within our visible cells
     BOOL animationsEnabled = ([(NSIndexPath *)[self.collectionView.indexPathsForVisibleItems lastObject] compare:indexPath] != NSOrderedAscending) && animationsWereEnabled;
@@ -117,6 +126,21 @@ static NSString * const kCollectionViewAdPlacerReuseIdentifier = @"MPCollectionV
 
 - (void)adPlacer:(MPStreamAdPlacer *)adPlacer didRemoveAdsAtIndexPaths:(NSArray *)indexPaths
 {
+    NSMutableArray<NSIndexPath *> *validIndexPaths = [NSMutableArray new];
+    for (NSIndexPath *indexPath in indexPaths) {
+        NSInteger sectionCount = [self.collectionView numberOfSections];
+        NSInteger rowCount = [self.collectionView numberOfItemsInSection:indexPath.section];
+        
+        // ignore out-of-range index path that cannot be removed from the collection view
+        if (indexPath.section < sectionCount && indexPath.row < rowCount) {
+            [validIndexPaths addObject:indexPath];
+        }
+    }
+    
+    if (validIndexPaths.count == 0) {
+        return;
+    }
+    
     BOOL animationsWereEnabled = [UIView areAnimationsEnabled];
     [UIView setAnimationsEnabled:NO];
 
@@ -145,6 +169,14 @@ static NSString * const kCollectionViewAdPlacerReuseIdentifier = @"MPCollectionV
 {
     if ([self.delegate respondsToSelector:@selector(nativeAdWillLeaveApplicationFromCollectionViewAdPlacer:)]) {
         [self.delegate nativeAdWillLeaveApplicationFromCollectionViewAdPlacer:self];
+    }
+}
+
+- (void)mopubAdPlacer:(id<MPMoPubAdPlacer>)adPlacer didTrackImpressionForAd:(id<MPMoPubAd>)ad withImpressionData:(MPImpressionData *)impressionData {
+    if ([self.delegate respondsToSelector:@selector(mopubAdPlacer:didTrackImpressionForAd:withImpressionData:)]) {
+        [self.delegate mopubAdPlacer:self
+             didTrackImpressionForAd:ad
+                  withImpressionData:impressionData];
     }
 }
 

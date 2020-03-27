@@ -18,6 +18,9 @@
 }
 
 - (void)requestInterstitialWithCustomEventInfo:(NSDictionary *)info {
+    [self requestInterstitialWithCustomEventInfo:info adMarkup:nil];
+}
+- (void)requestInterstitialWithCustomEventInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup {
     NSError *loadError = nil;
     if (![self canRequestWithCustomEventInfo:info error:&loadError]) {
         [self.delegate interstitialCustomEvent:self didFailToLoadAdWithError:loadError];

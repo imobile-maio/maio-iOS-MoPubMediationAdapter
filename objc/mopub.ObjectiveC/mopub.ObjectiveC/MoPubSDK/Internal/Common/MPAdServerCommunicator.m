@@ -64,7 +64,7 @@ static NSString * const kAdResonsesContentKey = @"content";
     self = [super init];
     if (self) {
         _delegate = delegate;
-        _topLevelJsonKeys = @[kNextUrlMetadataKey];
+        _topLevelJsonKeys = @[kNextUrlMetadataKey, kFormatMetadataKey];
     }
     return self;
 }
@@ -105,7 +105,6 @@ static NSString * const kAdResonsesContentKey = @"content";
 
         // Handle the response.
         [strongSelf didFinishLoadingWithData:data];
-
     } errorHandler:^(NSError * error) {
         // Capture strong self for the duration of this block.
         __typeof__(self) strongSelf = weakSelf;
@@ -153,7 +152,7 @@ static NSString * const kAdResonsesContentKey = @"content";
 }
 
 - (BOOL)isRateLimited {
-    return [[MPRateLimitManager sharedInstance] isRateLimitedForAdUnitId:[self.delegate adUnitIDForAdServerCommunicator:self]];
+    return [[MPRateLimitManager sharedInstance] isRateLimitedForAdUnitId:self.delegate.adUnitId];
 }
 
 - (void)failLoadForSDKInit {
@@ -171,6 +170,12 @@ static NSString * const kAdResonsesContentKey = @"content";
 }
 
 - (void)didFinishLoadingWithData:(NSData *)data {
+    // In the event that the @c adUnitIdUsedForConsent from @c MPConsentManager is @c nil or malformed,
+    // we should populate it with this known good adunit ID. This is to cover any edge case where the
+    // publisher manages to initialize with no adunit ID or a malformed adunit ID.
+    // It is known good since this is the success callback from the ad request.
+    [MPConsentManager.sharedManager setAdUnitIdUsedForConsent:self.delegate.adUnitId isKnownGood:YES];
+    
     // Headers from the original HTTP response are intentionally ignored as laid out
     // by the Client Side Waterfall design doc.
     //
@@ -225,7 +230,7 @@ static NSString * const kAdResonsesContentKey = @"content";
             continue;
         }
 
-        MPAdConfiguration * configuration = [[MPAdConfiguration alloc] initWithMetadata:metadata data:content adType:[self.delegate adTypeForAdServerCommunicator:self]];
+        MPAdConfiguration * configuration = [[MPAdConfiguration alloc] initWithMetadata:metadata data:content isFullscreenAd:self.delegate.isFullscreenAd];
         if (configuration != nil) {
             [configurations addObject:configuration];
         } else {
@@ -236,7 +241,7 @@ static NSString * const kAdResonsesContentKey = @"content";
     // Set up rate limiting (has no effect if backoffMs is 0)
     NSInteger backoffMs = [json[kBackoffMsKey] integerValue];
     NSString * backoffReason = json[kBackoffReasonKey];
-    [[MPRateLimitManager sharedInstance] setRateLimitTimerWithAdUnitId:[self.delegate adUnitIDForAdServerCommunicator:self]
+    [[MPRateLimitManager sharedInstance] setRateLimitTimerWithAdUnitId:self.delegate.adUnitId
                                                           milliseconds:backoffMs
                                                                 reason:backoffReason];
 

@@ -32,7 +32,7 @@
 - (void)precacheImagesWithURLs:(NSArray *)imageURLs completionBlock:(void (^)(NSArray *errors))completionBlock
 {
     if (imageURLs.count > 0) {
-        [_imageDownloadQueue addDownloadImageURLs:imageURLs completionBlock:^(NSArray *errors) {
+        [_imageDownloadQueue addDownloadImageURLs:imageURLs completionBlock:^(NSDictionary <NSURL *, UIImage *> *result, NSArray *errors) {
             if (completionBlock) {
                 completionBlock(errors);
             }
@@ -46,14 +46,13 @@
 
 - (void)requestAdWithCustomEventInfo:(NSDictionary *)info
 {
-    /*override with custom network behavior*/
+    // This deprecated method will forward the request to with no ad markup.
+    [self requestAdWithCustomEventInfo:info adMarkup:nil];
 }
 
 - (void)requestAdWithCustomEventInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup
 {
-    // By default, the original requestAdWithCustomEventInfo: method will be called.
-    // Otherwise subclasses must override this method and implement code to load a banner here.
-    [self requestAdWithCustomEventInfo:info];
+    /*override with custom network behavior*/
 }
 
 @end
