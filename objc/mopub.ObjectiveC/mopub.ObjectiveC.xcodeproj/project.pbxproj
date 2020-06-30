@@ -19,6 +19,7 @@
 		147F2DE1202AC21800E1FECA /* Maio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 147F2DE0202AC21800E1FECA /* Maio.framework */; };
 		147F2DE5202ADDA200E1FECA /* MaioRewardedVideo.m in Sources */ = {isa = PBXBuildFile; fileRef = 147F2DE4202ADDA200E1FECA /* MaioRewardedVideo.m */; };
 		147F2DE8202AF05200E1FECA /* MaioManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 147F2DE7202AF05200E1FECA /* MaioManager.m */; };
+		1F51733FF7F1B88C8BEF6988 /* Pods_mopub_ObjectiveC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B340301F382FB97BF9BAB4C6 /* Pods_mopub_ObjectiveC.framework */; };
 		C21EEF682267352C00F3B485 /* MaioAdapterConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = C21EEF672267352C00F3B485 /* MaioAdapterConfiguration.m */; };
 		C2696CB5229FDDCA00371E78 /* MaioAdStockOutRegister.m in Sources */ = {isa = PBXBuildFile; fileRef = C2696CB4229FDDCA00371E78 /* MaioAdStockOutRegister.m */; };
 /* End PBXBuildFile section */
@@ -58,6 +59,9 @@
 		147F2DE4202ADDA200E1FECA /* MaioRewardedVideo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MaioRewardedVideo.m; sourceTree = "<group>"; };
 		147F2DE6202AF05200E1FECA /* MaioManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MaioManager.h; sourceTree = "<group>"; };
 		147F2DE7202AF05200E1FECA /* MaioManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MaioManager.m; sourceTree = "<group>"; };
+		5FFA78541A732BC7EA9833E6 /* Pods-mopub.ObjectiveC.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-mopub.ObjectiveC.release.xcconfig"; path = "Target Support Files/Pods-mopub.ObjectiveC/Pods-mopub.ObjectiveC.release.xcconfig"; sourceTree = "<group>"; };
+		993EF7AA4602F78592A2F6C5 /* Pods-mopub.ObjectiveC.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-mopub.ObjectiveC.debug.xcconfig"; path = "Target Support Files/Pods-mopub.ObjectiveC/Pods-mopub.ObjectiveC.debug.xcconfig"; sourceTree = "<group>"; };
+		B340301F382FB97BF9BAB4C6 /* Pods_mopub_ObjectiveC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_mopub_ObjectiveC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C21EEF662267352C00F3B485 /* MaioAdapterConfiguration.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MaioAdapterConfiguration.h; sourceTree = "<group>"; };
 		C21EEF672267352C00F3B485 /* MaioAdapterConfiguration.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MaioAdapterConfiguration.m; sourceTree = "<group>"; };
 		C2696CB3229FDDCA00371E78 /* MaioAdStockOutRegister.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MaioAdStockOutRegister.h; sourceTree = "<group>"; };
@@ -70,6 +74,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				147F2DE1202AC21800E1FECA /* Maio.framework in Frameworks */,
+				1F51733FF7F1B88C8BEF6988 /* Pods_mopub_ObjectiveC.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,6 +87,7 @@
 				147F28A220299A5400E1FECA /* mopub.ObjectiveC */,
 				147F28A120299A5400E1FECA /* Products */,
 				147F2B712029A00600E1FECA /* Frameworks */,
+				C0D03C98D6AB7614F9CF0D96 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -114,6 +120,7 @@
 			isa = PBXGroup;
 			children = (
 				147F2DE0202AC21800E1FECA /* Maio.framework */,
+				B340301F382FB97BF9BAB4C6 /* Pods_mopub_ObjectiveC.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -139,6 +146,15 @@
 			path = MaioMoPubAdapter;
 			sourceTree = "<group>";
 		};
+		C0D03C98D6AB7614F9CF0D96 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				993EF7AA4602F78592A2F6C5 /* Pods-mopub.ObjectiveC.debug.xcconfig */,
+				5FFA78541A732BC7EA9833E6 /* Pods-mopub.ObjectiveC.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -146,10 +162,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 147F28B620299A5400E1FECA /* Build configuration list for PBXNativeTarget "mopub.ObjectiveC" */;
 			buildPhases = (
+				53BFEE792E6E84048F36539A /* [CP] Check Pods Manifest.lock */,
 				147F289C20299A5400E1FECA /* Sources */,
 				147F289D20299A5400E1FECA /* Frameworks */,
 				147F289E20299A5400E1FECA /* Resources */,
 				147F2B7020299FFF00E1FECA /* Embed Frameworks */,
+				D70FAB71B7E39576CD76FEB7 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -205,6 +223,49 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		53BFEE792E6E84048F36539A /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-mopub.ObjectiveC-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D70FAB71B7E39576CD76FEB7 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-mopub.ObjectiveC/Pods-mopub.ObjectiveC-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/mopub-ios-sdk/MoPub.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MoPub.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-mopub.ObjectiveC/Pods-mopub.ObjectiveC-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		147F289C20299A5400E1FECA /* Sources */ = {
@@ -352,6 +413,7 @@
 		};
 		147F28B720299A5400E1FECA /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 993EF7AA4602F78592A2F6C5 /* Pods-mopub.ObjectiveC.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -368,7 +430,10 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/mopub.ObjectiveC/MoPubSDK/Viewability/Avid",
 				);
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.maio.mopub-ObjectiveC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -377,6 +442,7 @@
 		};
 		147F28B820299A5400E1FECA /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5FFA78541A732BC7EA9833E6 /* Pods-mopub.ObjectiveC.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -393,7 +459,10 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/mopub.ObjectiveC/MoPubSDK/Viewability/Avid",
 				);
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "jp.maio.mopub-ObjectiveC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
