@@ -80,7 +80,7 @@
 
     MaioManager *manager = [MaioManager sharedInstance];
     if (![manager canShowAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId]) return;
-    [manager showAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId];
+    [manager showAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId viewController:viewController];
 }
 
 - (BOOL)canRequestWithCustomEventInfo:(NSDictionary*)info error:(NSError**)errorPointer {
