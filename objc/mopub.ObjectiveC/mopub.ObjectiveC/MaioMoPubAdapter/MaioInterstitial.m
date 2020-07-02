@@ -36,10 +36,7 @@
     return YES;
 }
 
-- (void)requestInterstitialWithCustomEventInfo:(NSDictionary *)info {
-    [self requestInterstitialWithCustomEventInfo:info adMarkup:nil];
-}
-- (void)requestInterstitialWithCustomEventInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup {
+- (void)requestAdWithAdapterInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup {
     NSError *loadError = nil;
     if (![self canRequestWithCustomEventInfo:info error:&loadError]) {
         [self.delegate fullscreenAdAdapter:self didFailToLoadAdWithError:loadError];
@@ -78,7 +75,7 @@
 
 }
 
-- (void)showInterstitialFromRootViewController:(UIViewController *)rootViewController {
+- (void)presentAdFromViewController:(UIViewController *)viewController {
     MPLogAdEvent([MPLogEvent adShowAttemptForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
 
     MaioManager *manager = [MaioManager sharedInstance];
