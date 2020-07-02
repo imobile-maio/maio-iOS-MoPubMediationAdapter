@@ -25,5 +25,7 @@
 
 - (void)showAtMediaId:(NSString *)mediaId zoneId:(NSString *)zoneId;
 
+- (void)showAtMediaId:(NSString *)mediaId zoneId:(NSString *)zoneId viewController: (UIViewController*) viewController;
+
 - (void)addDelegate:(id <MaioDelegate>)delegate forMediaId:(NSString *)mediaId;
 @end
