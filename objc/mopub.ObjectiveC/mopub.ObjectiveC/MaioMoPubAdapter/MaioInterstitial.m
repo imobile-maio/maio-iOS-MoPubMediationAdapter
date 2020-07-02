@@ -12,10 +12,14 @@
 #import "MPLogging.h"
 #import "MoPub.h"
 
-@implementation MaioInterstitial {
-    MaioCredentials *_credentials;
-    BOOL _isAdRequested;
-}
+@interface MaioInterstitial ()
+
+@property (nonatomic) MaioCredentials *credentials;
+@property (nonatomic) BOOL isAdRequested;
+
+@end
+
+@implementation MaioInterstitial
 
 - (void)requestInterstitialWithCustomEventInfo:(NSDictionary *)info {
     [self requestInterstitialWithCustomEventInfo:info adMarkup:nil];
