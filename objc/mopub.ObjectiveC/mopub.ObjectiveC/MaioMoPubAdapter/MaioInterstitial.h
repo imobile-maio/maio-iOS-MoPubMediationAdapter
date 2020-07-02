@@ -11,4 +11,7 @@
 
 @interface MaioInterstitial : MPFullscreenAdAdapter <MPThirdPartyFullscreenAdAdapter, MaioDelegate>
 
+/// Initialized by `MPFullscreenAdAdapter -init`
+@property (nonatomic, weak, readonly) id<MPFullscreenAdAdapterDelegate> delegate;
+
 @end
