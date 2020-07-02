@@ -7,8 +7,8 @@
 
 #import <UIKit/UIKit.h>
 #import <Maio/Maio.h>
-#import "MPInterstitialCustomEvent.h"
+#import "MPFullscreenAdAdapter.h"
 
-@interface MaioInterstitial : MPInterstitialCustomEvent <MaioDelegate>
+@interface MaioInterstitial : MPFullscreenAdAdapter <MPThirdPartyFullscreenAdAdapter, MaioDelegate>
 
 @end
