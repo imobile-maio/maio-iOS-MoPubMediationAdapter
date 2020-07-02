@@ -21,6 +21,21 @@
 
 @implementation MaioInterstitial
 
+- (BOOL)isRewardExpected {
+    return NO;
+}
+
+- (BOOL)hasAdAvailable {
+    return [[MaioManager sharedInstance] canShowAtMediaId:self.credentials.mediaId zoneId:self.credentials.zoneId];
+}
+- (void)setHasAdAvailable:(BOOL)hasAdAvailable {
+    // NOOP
+}
+
+- (BOOL)enableAutomaticImpressionAndClickTracking {
+    return YES;
+}
+
 - (void)requestInterstitialWithCustomEventInfo:(NSDictionary *)info {
     [self requestInterstitialWithCustomEventInfo:info adMarkup:nil];
 }
