@@ -7,8 +7,8 @@
 
 #import <Foundation/Foundation.h>
 #import <Maio/Maio.h>
-#import "MPRewardedVideoCustomEvent.h"
+#import "MPFullscreenAdAdapter.h"
 
-@interface MaioRewardedVideo : MPRewardedVideoCustomEvent <MaioDelegate>
+@interface MaioRewardedVideo : MPFullscreenAdAdapter <MPThirdPartyFullscreenAdAdapter, MaioDelegate>
 
 @end
