@@ -26,6 +26,12 @@
     return YES;
 }
 
+/// Declared  by `MPFullscreenAdAdapter+Private.h`
+/// Initialized by `MPFullscreenAdAdapter -init`
+- (id<MPFullscreenAdAdapterDelegate>)delegate {
+    return super.delegate;
+}
+
 - (BOOL)hasAdAvailable {
     MaioManager *manager = [MaioManager sharedInstance];
     if ([manager isAdStockOut:_credentials.zoneId]) {

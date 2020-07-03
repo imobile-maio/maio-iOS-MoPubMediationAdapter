@@ -11,10 +11,9 @@
 
 @interface MaioRewardedVideo : MPFullscreenAdAdapter <MPThirdPartyFullscreenAdAdapter, MaioDelegate>
 
-/// Initialized by `MPFullscreenAdAdapter -init`
-@property (nonatomic, weak, readonly) id<MPFullscreenAdAdapterDelegate> delegate;
-
 /// Initialized by  `MPFullscreenAdAdapter -setUpWithAdConfiguration:localExtras:`
 @property (nonatomic, copy) NSDictionary *localExtras;
+
+@property (nonatomic) BOOL hasAdAvailable;
 
 @end
