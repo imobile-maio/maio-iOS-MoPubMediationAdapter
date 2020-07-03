@@ -22,6 +22,25 @@
 
 @implementation MaioRewardedVideo
 
+- (BOOL)isRewardExpected {
+    return YES;
+}
+
+- (BOOL)hasAdAvailable {
+    MaioManager *manager = [MaioManager sharedInstance];
+    if ([manager isAdStockOut:_credentials.zoneId]) {
+        return NO;
+    }
+    return [manager canShowAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId];
+}
+- (void)setHasAdAvailable:(BOOL)hasAdAvailable {
+    // NOOP
+}
+
+- (BOOL)enableAutomaticImpressionAndClickTracking {
+    return YES;
+}
+
 - (void)initializeSdkWithParameters:(NSDictionary *)parameters {
     _credentials = [MaioCredentials credentialsFromDictionary:parameters];
     [self initializeMaioSdk];
@@ -77,13 +96,6 @@
     [manager startWithMediaId:_credentials.mediaId delegate:self];
 }
 
-- (BOOL)hasAdAvailable {
-    MaioManager *manager = [MaioManager sharedInstance];
-    if ([manager isAdStockOut:_credentials.zoneId]) {
-        return NO;
-    }
-    return [manager canShowAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId];
-}
 
 - (void)presentRewardedVideoFromViewController:(UIViewController *)viewController {
     MPLogAdEvent([MPLogEvent adShowAttemptForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
