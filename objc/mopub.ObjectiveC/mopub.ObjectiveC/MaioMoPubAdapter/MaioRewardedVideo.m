@@ -13,10 +13,14 @@
 #import "MPLogging.h"
 #import "MoPub.h"
 
-@implementation MaioRewardedVideo {
-    MaioCredentials *_credentials;
-    BOOL _isAdRequested;
-}
+@interface MaioRewardedVideo ()
+
+@property (nonatomic) MaioCredentials *credentials;
+@property (nonatomic) BOOL isAdRequested;
+
+@end
+
+@implementation MaioRewardedVideo
 
 - (void)initializeSdkWithParameters:(NSDictionary *)parameters {
     _credentials = [MaioCredentials credentialsFromDictionary:parameters];
