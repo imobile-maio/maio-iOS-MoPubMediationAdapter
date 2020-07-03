@@ -33,7 +33,7 @@
 - (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup {
     NSError* loadError = nil;
     if (![self canRequestWithCustomEventInfo:info error:&loadError]) {
-        [self.delegate rewardedVideoDidFailToLoadAdForCustomEvent:self error:loadError];
+        [self.delegate fullscreenAdAdapter:self didFailToLoadAdWithError:loadError];
         MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:loadError], nil);
         return;
     }
@@ -55,12 +55,12 @@
 
     if ([manager isAdStockOut:_credentials.zoneId]) {
         NSError *adStockOutError = [MaioError loadFailedWithReason:MaioFailReasonAdStockOut];
-        [self.delegate rewardedVideoDidFailToLoadAdForCustomEvent:self error:adStockOutError];
+        [self.delegate fullscreenAdAdapter:self didFailToLoadAdWithError:adStockOutError];
         MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:adStockOutError], nil);
     }
 
     if ([manager canShowAtMediaId:credentials.mediaId zoneId:credentials.zoneId]) {
-        [self.delegate rewardedVideoDidLoadAdForCustomEvent:self];
+        [self.delegate fullscreenAdAdapterDidLoadAd:self];
         MPLogAdEvent([MPLogEvent adLoadSuccessForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     } else {
         _isAdRequested = YES;
@@ -107,7 +107,7 @@
     _isAdRequested = NO;
 
     if (newValue) {
-        [self.delegate rewardedVideoDidLoadAdForCustomEvent:self];
+        [self.delegate fullscreenAdAdapterDidLoadAd:self];
         MPLogAdEvent([MPLogEvent adLoadSuccessForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     }
 }
@@ -117,8 +117,8 @@
         return;
     }
 
-    [self.delegate rewardedVideoDidReceiveTapEventForCustomEvent:self];
-    [self.delegate rewardedVideoWillLeaveApplicationForCustomEvent:self];
+    [self.delegate fullscreenAdAdapterDidReceiveTap:self];
+    [self.delegate fullscreenAdAdapterWillLeaveApplication:self];
     MPLogAdEvent([MPLogEvent adTappedForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     MPLogAdEvent([MPLogEvent adWillLeaveApplicationForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
 }
@@ -128,8 +128,8 @@
         return;
     }
 
-    [self.delegate rewardedVideoWillAppearForCustomEvent:self];
-    [self.delegate rewardedVideoDidAppearForCustomEvent:self];
+    [self.delegate fullscreenAdAdapterAdWillAppear:self];
+    [self.delegate fullscreenAdAdapterAdDidAppear:self];
     MPLogAdEvent([MPLogEvent adWillAppearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     MPLogAdEvent([MPLogEvent adDidAppearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     MPLogAdEvent([MPLogEvent adShowSuccessForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
@@ -140,8 +140,8 @@
         return;
     }
 
-    [self.delegate rewardedVideoWillDisappearForCustomEvent:self];
-    [self.delegate rewardedVideoDidDisappearForCustomEvent:self];
+    [self.delegate fullscreenAdAdapterAdWillDisappear:self];
+    [self.delegate fullscreenAdAdapterAdDidDisappear:self];
     MPLogAdEvent([MPLogEvent adWillDisappearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     MPLogAdEvent([MPLogEvent adDidDisappearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
 }
@@ -153,7 +153,7 @@
 
 
     MPRewardedVideoReward *reward = [[MPRewardedVideoReward alloc] initWithCurrencyAmount:@([rewardParam intValue])];
-    [self.delegate rewardedVideoShouldRewardUserForCustomEvent:self reward:reward];
+    [self.delegate fullscreenAdAdapter:self willRewardUser:reward];
 }
 
 - (void)maioDidFail:(NSString *)zoneId reason:(MaioFailReason)reason {
@@ -163,12 +163,12 @@
 
     if (reason == MaioFailReasonVideoPlayback) {
         NSError *playbackError = [MaioError loadFailedWithReason:reason];
-        [self.delegate rewardedVideoDidFailToPlayForCustomEvent:self error:playbackError];
+        [self.delegate fullscreenAdAdapter:self didFailToShowAdWithError:playbackError];
         MPLogAdEvent([MPLogEvent adShowFailedForAdapter:NSStringFromClass(self.class) error:playbackError], _credentials.zoneId);
         return;
     }
     NSError *loadError = [MaioError loadFailedWithReason:reason];
-    [self.delegate rewardedVideoDidFailToLoadAdForCustomEvent:self error:loadError];
+    [self.delegate fullscreenAdAdapter:self didFailToLoadAdWithError:loadError];
     MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:loadError], _credentials.zoneId);
 }
 
