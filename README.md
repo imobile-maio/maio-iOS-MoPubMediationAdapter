@@ -2,6 +2,10 @@
 
 # maio Mopub Mediation Adapter
 
+## Requirement
+
+- MoPubSDK 5.13.0+
+
 # Get Started
 
 ## Adding Maio to your MoPub Dashboard
