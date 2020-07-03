@@ -32,7 +32,11 @@
 }
 
 - (BOOL)hasAdAvailable {
-    return [[MaioManager sharedInstance] canShowAtMediaId:self.credentials.mediaId zoneId:self.credentials.zoneId];
+    MaioManager *manager = [MaioManager sharedInstance];
+    if ([manager isAdStockOut:self.credentials.zoneId]) {
+        return NO;
+    }
+    return [manager canShowAtMediaId:self.credentials.mediaId zoneId:self.credentials.zoneId];
 }
 - (void)setHasAdAvailable:(BOOL)hasAdAvailable {
     // NOOP
