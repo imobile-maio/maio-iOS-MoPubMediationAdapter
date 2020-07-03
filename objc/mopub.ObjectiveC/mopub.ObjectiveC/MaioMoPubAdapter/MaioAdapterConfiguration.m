@@ -9,7 +9,7 @@
 #import "MaioAdapterConfiguration.h"
 #import <Maio/Maio.h>
 
-static NSString* const kMaioAdapterVersion = @"1.5.3.0";
+static NSString* const kMaioAdapterVersion = @"1.5.3.1";
 
 @implementation MaioAdapterConfiguration
 
