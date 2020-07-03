@@ -46,10 +46,7 @@
     [self initializeMaioSdk];
 }
 
-- (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info {
-    [self requestRewardedVideoWithCustomEventInfo:info adMarkup:nil];
-}
-- (void)requestRewardedVideoWithCustomEventInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup {
+- (void)requestAdWithAdapterInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup {
     NSError* loadError = nil;
     if (![self canRequestWithCustomEventInfo:info error:&loadError]) {
         [self.delegate fullscreenAdAdapter:self didFailToLoadAdWithError:loadError];
@@ -96,8 +93,7 @@
     [manager startWithMediaId:_credentials.mediaId delegate:self];
 }
 
-
-- (void)presentRewardedVideoFromViewController:(UIViewController *)viewController {
+- (void)presentAdFromViewController:(UIViewController *)viewController {
     MPLogAdEvent([MPLogEvent adShowAttemptForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     [[MaioManager sharedInstance] showAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId];
 }
