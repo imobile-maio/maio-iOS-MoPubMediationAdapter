@@ -11,7 +11,4 @@
 
 @interface MaioInterstitial : MPFullscreenAdAdapter <MPThirdPartyFullscreenAdAdapter, MaioDelegate>
 
-/// Initialized by  `MPFullscreenAdAdapter -setUpWithAdConfiguration:localExtras:`
-@property (nonatomic, copy) NSDictionary *localExtras;
-
 @end

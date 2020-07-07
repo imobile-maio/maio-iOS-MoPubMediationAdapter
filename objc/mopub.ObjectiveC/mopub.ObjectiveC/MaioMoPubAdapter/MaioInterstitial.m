@@ -21,6 +21,10 @@
 
 @implementation MaioInterstitial
 
+/// Declared  by `MPFullscreenAdAdapter+Private.h`
+/// Initialized by  `MPFullscreenAdAdapter -setUpWithAdConfiguration:localExtras:`
+@dynamic localExtras;
+
 - (BOOL)isRewardExpected {
     return NO;
 }

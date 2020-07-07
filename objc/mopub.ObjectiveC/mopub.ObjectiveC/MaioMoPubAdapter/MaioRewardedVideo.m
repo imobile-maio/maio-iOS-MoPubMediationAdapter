@@ -22,6 +22,10 @@
 
 @implementation MaioRewardedVideo
 
+/// Declared  by `MPFullscreenAdAdapter+Private.h`
+/// Initialized by  `MPFullscreenAdAdapter -setUpWithAdConfiguration:localExtras:`
+@dynamic localExtras;
+
 - (BOOL)isRewardExpected {
     return YES;
 }
