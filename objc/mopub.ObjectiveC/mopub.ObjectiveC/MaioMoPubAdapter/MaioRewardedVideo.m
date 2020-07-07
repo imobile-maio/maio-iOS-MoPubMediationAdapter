@@ -23,16 +23,16 @@
 @implementation MaioRewardedVideo
 
 /// Declared  by `MPFullscreenAdAdapter+Private.h`
+/// Initialized by `MPFullscreenAdAdapter -init`
+@dynamic delegate;
+
+/// Declared  by `MPFullscreenAdAdapter+Private.h`
 /// Initialized by  `MPFullscreenAdAdapter -setUpWithAdConfiguration:localExtras:`
 @dynamic localExtras;
 
 - (BOOL)isRewardExpected {
     return YES;
 }
-
-/// Declared  by `MPFullscreenAdAdapter+Private.h`
-/// Initialized by `MPFullscreenAdAdapter -init`
-@dynamic delegate;
 
 - (BOOL)hasAdAvailable {
     MaioManager *manager = [MaioManager sharedInstance];

@@ -22,6 +22,10 @@
 @implementation MaioInterstitial
 
 /// Declared  by `MPFullscreenAdAdapter+Private.h`
+/// Initialized by `MPFullscreenAdAdapter -init`
+@dynamic delegate;
+
+/// Declared  by `MPFullscreenAdAdapter+Private.h`
 /// Initialized by  `MPFullscreenAdAdapter -setUpWithAdConfiguration:localExtras:`
 @dynamic localExtras;
 
@@ -29,9 +33,6 @@
     return NO;
 }
 
-/// Declared  by `MPFullscreenAdAdapter+Private.h`
-/// Initialized by `MPFullscreenAdAdapter -init`
-@dynamic delegate;
 
 - (BOOL)hasAdAvailable {
     MaioManager *manager = [MaioManager sharedInstance];
