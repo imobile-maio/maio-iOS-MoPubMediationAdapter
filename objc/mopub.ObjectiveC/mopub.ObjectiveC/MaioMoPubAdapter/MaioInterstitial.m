@@ -27,9 +27,7 @@
 
 /// Declared  by `MPFullscreenAdAdapter+Private.h`
 /// Initialized by `MPFullscreenAdAdapter -init`
-- (id<MPFullscreenAdAdapterDelegate>)delegate {
-    return super.delegate;
-}
+@dynamic delegate;
 
 - (BOOL)hasAdAvailable {
     MaioManager *manager = [MaioManager sharedInstance];
