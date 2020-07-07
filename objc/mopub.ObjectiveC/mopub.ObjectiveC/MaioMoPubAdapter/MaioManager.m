@@ -192,13 +192,13 @@
     return [instance canShowAtZoneId:zoneId];
 }
 
-- (void)showAtMediaId:(NSString *)mediaId zoneId:(NSString *)zoneId {
+- (void)showAtMediaId:(NSString *)mediaId zoneId:(NSString *)zoneId viewController: (UIViewController*) viewController {
     if (!_references[mediaId]) {
         return;
     }
 
     MaioInstance *instance = _references[mediaId];
-    [instance showAtZoneId:zoneId];
+    [instance showAtZoneId:zoneId vc: viewController];
 }
 
 @end

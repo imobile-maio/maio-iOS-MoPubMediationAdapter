@@ -12,18 +12,47 @@
 #import "MPLogging.h"
 #import "MoPub.h"
 
-@implementation MaioInterstitial {
-    MaioCredentials *_credentials;
-    BOOL _isAdRequested;
+@interface MaioInterstitial ()
+
+@property (nonatomic) MaioCredentials *credentials;
+@property (nonatomic) BOOL isAdRequested;
+
+@end
+
+@implementation MaioInterstitial
+
+/// Declared  by `MPFullscreenAdAdapter+Private.h`
+/// Initialized by `MPFullscreenAdAdapter -init`
+@dynamic delegate;
+
+/// Declared  by `MPFullscreenAdAdapter+Private.h`
+/// Initialized by  `MPFullscreenAdAdapter -setUpWithAdConfiguration:localExtras:`
+@dynamic localExtras;
+
+- (BOOL)isRewardExpected {
+    return NO;
 }
 
-- (void)requestInterstitialWithCustomEventInfo:(NSDictionary *)info {
-    [self requestInterstitialWithCustomEventInfo:info adMarkup:nil];
+
+- (BOOL)hasAdAvailable {
+    MaioManager *manager = [MaioManager sharedInstance];
+    if ([manager isAdStockOut:self.credentials.zoneId]) {
+        return NO;
+    }
+    return [manager canShowAtMediaId:self.credentials.mediaId zoneId:self.credentials.zoneId];
 }
-- (void)requestInterstitialWithCustomEventInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup {
+- (void)setHasAdAvailable:(BOOL)hasAdAvailable {
+    // NOOP
+}
+
+- (BOOL)enableAutomaticImpressionAndClickTracking {
+    return YES;
+}
+
+- (void)requestAdWithAdapterInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup {
     NSError *loadError = nil;
     if (![self canRequestWithCustomEventInfo:info error:&loadError]) {
-        [self.delegate interstitialCustomEvent:self didFailToLoadAdWithError:loadError];
+        [self.delegate fullscreenAdAdapter:self didFailToLoadAdWithError:loadError];
         MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:loadError], nil);
         return;
     }
@@ -46,12 +75,12 @@
 
     if ([manager isAdStockOut:_credentials.zoneId]) {
         NSError *adStockOutError = [MaioError loadFailedWithReason:MaioFailReasonAdStockOut];
-        [self.delegate interstitialCustomEvent:self didFailToLoadAdWithError:adStockOutError];
+        [self.delegate fullscreenAdAdapter:self didFailToLoadAdWithError:adStockOutError];
         MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:adStockOutError], nil);
     }
 
     if ([manager canShowAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId]) {
-        [self.delegate interstitialCustomEvent:self didLoadAd:self];
+        [self.delegate fullscreenAdAdapterDidLoadAd:self];
         MPLogAdEvent([MPLogEvent adLoadSuccessForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     } else {
         _isAdRequested = YES;
@@ -59,12 +88,12 @@
 
 }
 
-- (void)showInterstitialFromRootViewController:(UIViewController *)rootViewController {
+- (void)presentAdFromViewController:(UIViewController *)viewController {
     MPLogAdEvent([MPLogEvent adShowAttemptForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
 
     MaioManager *manager = [MaioManager sharedInstance];
     if (![manager canShowAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId]) return;
-    [manager showAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId];
+    [manager showAtMediaId:_credentials.mediaId zoneId:_credentials.zoneId viewController:viewController];
 }
 
 - (BOOL)canRequestWithCustomEventInfo:(NSDictionary*)info error:(NSError**)errorPointer {
@@ -84,11 +113,11 @@
     _isAdRequested = NO;
 
     if (newValue) {
-        [self.delegate interstitialCustomEvent:self didLoadAd:self];
+        [self.delegate fullscreenAdAdapterDidLoadAd:self];
         MPLogAdEvent([MPLogEvent adLoadSuccessForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     } else {
         NSError *loadError = [MaioError loadFailed];
-        [self.delegate interstitialCustomEvent:self didFailToLoadAdWithError:loadError];
+        [self.delegate fullscreenAdAdapter:self didFailToLoadAdWithError:loadError];
         MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:loadError], _credentials.zoneId);
     }
 }
@@ -98,8 +127,8 @@
         return;
     }
 
-    [self.delegate interstitialCustomEventDidReceiveTapEvent:self];
-    [self.delegate interstitialCustomEventWillLeaveApplication:self];
+    [self.delegate fullscreenAdAdapterDidReceiveTap:self];
+    [self.delegate fullscreenAdAdapterWillLeaveApplication:self];
     MPLogAdEvent([MPLogEvent adTappedForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     MPLogAdEvent([MPLogEvent adWillLeaveApplicationForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
 }
@@ -109,8 +138,8 @@
         return;
     }
 
-    [self.delegate interstitialCustomEventWillDisappear:self];
-    [self.delegate interstitialCustomEventDidDisappear:self];
+    [self.delegate fullscreenAdAdapterAdWillDisappear:self];
+    [self.delegate fullscreenAdAdapterAdDidDisappear:self];
     MPLogAdEvent([MPLogEvent adWillDisappearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     MPLogAdEvent([MPLogEvent adDidDisappearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
 }
@@ -120,8 +149,8 @@
         return;
     }
 
-    [self.delegate interstitialCustomEventWillAppear:self];
-    [self.delegate interstitialCustomEventDidAppear:self];
+    [self.delegate fullscreenAdAdapterAdWillAppear:self];
+    [self.delegate fullscreenAdAdapterAdDidAppear:self];
     MPLogAdEvent([MPLogEvent adWillAppearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     MPLogAdEvent([MPLogEvent adDidAppearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     MPLogAdEvent([MPLogEvent adShowSuccessForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
@@ -135,13 +164,13 @@
     if (reason == MaioFailReasonVideoPlayback) {
         NSError *playbackError = [MaioError loadFailedWithReason:reason];
         // MPInterstitialCustomEventDelegate has'nt didFailToPlayAdWithError
-        [self.delegate interstitialCustomEvent:self didFailToLoadAdWithError:playbackError];
+        [self.delegate fullscreenAdAdapter:self didFailToShowAdWithError:playbackError];
         MPLogAdEvent([MPLogEvent adShowFailedForAdapter:NSStringFromClass(self.class) error:playbackError], _credentials.zoneId);
         return;
     }
 
     NSError *loadError = [MaioError loadFailedWithReason:reason];
-    [self.delegate interstitialCustomEvent:self didFailToLoadAdWithError:loadError];
+    [self.delegate fullscreenAdAdapter:self didFailToLoadAdWithError:loadError];
     MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:loadError], _credentials.zoneId);
 }
 
