@@ -11,6 +11,4 @@
 
 @interface MaioRewardedVideo : MPFullscreenAdAdapter <MPThirdPartyFullscreenAdAdapter, MaioDelegate>
 
-@property (nonatomic) BOOL hasAdAvailable;
-
 @end
