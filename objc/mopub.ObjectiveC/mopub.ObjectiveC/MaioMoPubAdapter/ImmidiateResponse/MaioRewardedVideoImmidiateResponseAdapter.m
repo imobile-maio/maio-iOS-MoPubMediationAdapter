@@ -6,7 +6,7 @@
 //  Copyright © 2020 maio. All rights reserved.
 //
 
-#import "MaioRewardedVideoImmidiateResponseApdapter.h"
+#import "MaioRewardedVideoImmidiateResponseAdapter.h"
 #import <Maio/Maio.h>
 
 #import "MPLogging.h"
@@ -15,13 +15,13 @@
 #import "MaioError.h"
 #import "MaioCredentials.h"
 
-@interface MaioRewardedVideoImmidiateResponseApdapter () <MaioDelegate>
+@interface MaioRewardedVideoImmidiateResponseAdapter () <MaioDelegate>
 
 @property (nonatomic) MaioCredentials *credentials;
 
 @end
 
-@implementation MaioRewardedVideoImmidiateResponseApdapter
+@implementation MaioRewardedVideoImmidiateResponseAdapter
 
 /// Declared  by `MPFullscreenAdAdapter+Private.h`
 /// Initialized by `MPFullscreenAdAdapter -init`

@@ -12,7 +12,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /// Immidiate response. But fail to load ad when initialize media.
-@interface MaioRewardedVideoImmidiateResponseApdapter : MPFullscreenAdAdapter <MPThirdPartyFullscreenAdAdapter>
+@interface MaioRewardedVideoImmidiateResponseAdapter : MPFullscreenAdAdapter <MPThirdPartyFullscreenAdAdapter>
 
 @end
 
