@@ -21,6 +21,7 @@
 		147F2DE8202AF05200E1FECA /* MaioManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 147F2DE7202AF05200E1FECA /* MaioManager.m */; };
 		1F51733FF7F1B88C8BEF6988 /* Pods_mopub_ObjectiveC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B340301F382FB97BF9BAB4C6 /* Pods_mopub_ObjectiveC.framework */; };
 		C21EEF682267352C00F3B485 /* MaioAdapterConfiguration.m in Sources */ = {isa = PBXBuildFile; fileRef = C21EEF672267352C00F3B485 /* MaioAdapterConfiguration.m */; };
+		C2463CE4256E5AC8006F4F81 /* MaioRewardedVideoImmidiateResponseApdapter.m in Sources */ = {isa = PBXBuildFile; fileRef = C2463CE3256E5AC8006F4F81 /* MaioRewardedVideoImmidiateResponseApdapter.m */; };
 		C2696CB5229FDDCA00371E78 /* MaioAdStockOutRegister.m in Sources */ = {isa = PBXBuildFile; fileRef = C2696CB4229FDDCA00371E78 /* MaioAdStockOutRegister.m */; };
 /* End PBXBuildFile section */
 
@@ -64,6 +65,8 @@
 		B340301F382FB97BF9BAB4C6 /* Pods_mopub_ObjectiveC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_mopub_ObjectiveC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C21EEF662267352C00F3B485 /* MaioAdapterConfiguration.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MaioAdapterConfiguration.h; sourceTree = "<group>"; };
 		C21EEF672267352C00F3B485 /* MaioAdapterConfiguration.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MaioAdapterConfiguration.m; sourceTree = "<group>"; };
+		C2463CE2256E5AC8006F4F81 /* MaioRewardedVideoImmidiateResponseApdapter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MaioRewardedVideoImmidiateResponseApdapter.h; sourceTree = "<group>"; };
+		C2463CE3256E5AC8006F4F81 /* MaioRewardedVideoImmidiateResponseApdapter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MaioRewardedVideoImmidiateResponseApdapter.m; sourceTree = "<group>"; };
 		C2696CB3229FDDCA00371E78 /* MaioAdStockOutRegister.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MaioAdStockOutRegister.h; sourceTree = "<group>"; };
 		C2696CB4229FDDCA00371E78 /* MaioAdStockOutRegister.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MaioAdStockOutRegister.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -128,6 +131,7 @@
 		147F2DE2202ADCCC00E1FECA /* MaioMoPubAdapter */ = {
 			isa = PBXGroup;
 			children = (
+				C2463CE1256E5A89006F4F81 /* ImmidiateResponse */,
 				147F2DDA202AB8D200E1FECA /* MaioInterstitial.h */,
 				147F2DDB202AB8D200E1FECA /* MaioInterstitial.m */,
 				147F2DDD202ABA6B00E1FECA /* MaioCredentials.h */,
@@ -153,6 +157,15 @@
 				5FFA78541A732BC7EA9833E6 /* Pods-mopub.ObjectiveC.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		C2463CE1256E5A89006F4F81 /* ImmidiateResponse */ = {
+			isa = PBXGroup;
+			children = (
+				C2463CE2256E5AC8006F4F81 /* MaioRewardedVideoImmidiateResponseApdapter.h */,
+				C2463CE3256E5AC8006F4F81 /* MaioRewardedVideoImmidiateResponseApdapter.m */,
+			);
+			path = ImmidiateResponse;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -274,6 +287,7 @@
 			files = (
 				147F2DDC202AB8D200E1FECA /* MaioInterstitial.m in Sources */,
 				147F2DDF202ABA6B00E1FECA /* MaioCredentials.m in Sources */,
+				C2463CE4256E5AC8006F4F81 /* MaioRewardedVideoImmidiateResponseApdapter.m in Sources */,
 				147F28A820299A5400E1FECA /* ViewController.m in Sources */,
 				147F2DE8202AF05200E1FECA /* MaioManager.m in Sources */,
 				C21EEF682267352C00F3B485 /* MaioAdapterConfiguration.m in Sources */,
