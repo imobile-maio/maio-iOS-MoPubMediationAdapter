@@ -55,7 +55,7 @@
 
 - (void)requestAdWithAdapterInfo:(NSDictionary *)info adMarkup:(NSString *)adMarkup {
     NSError* loadError = nil;
-    if ([MaioManager canRequestWithCustomEventInfo:info error:&loadError]) {
+    if (![MaioManager canRequestWithCustomEventInfo:info error:&loadError]) {
         [self.delegate fullscreenAdAdapter:self didFailToLoadAdWithError:loadError];
         MPLogAdEvent([MPLogEvent adLoadFailedForAdapter:NSStringFromClass(self.class) error:loadError], nil);
         return;
