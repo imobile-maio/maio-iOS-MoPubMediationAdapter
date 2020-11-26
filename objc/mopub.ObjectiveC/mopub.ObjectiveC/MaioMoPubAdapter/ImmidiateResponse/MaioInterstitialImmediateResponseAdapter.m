@@ -1,12 +1,12 @@
 //
-//  MaioInterstitialImmidiateResponseAdapter.m
+//  MaioInterstitialImmediateResponseAdapter.m
 //  mopub.ObjectiveC
 //
 //  Created by im-ttmskk on 2020/11/25.
 //  Copyright © 2020 maio. All rights reserved.
 //
 
-#import "MaioInterstitialImmidiateResponseAdapter.h"
+#import "MaioInterstitialImmediateResponseAdapter.h"
 #import <Maio/Maio.h>
 
 #import "MPLogging.h"
@@ -15,13 +15,13 @@
 #import "MaioError.h"
 #import "MaioCredentials.h"
 
-@interface MaioInterstitialImmidiateResponseAdapter () <MaioDelegate>
+@interface MaioInterstitialImmediateResponseAdapter () <MaioDelegate>
 
 @property (nonatomic) MaioCredentials *credentials;
 
 @end
 
-@implementation MaioInterstitialImmidiateResponseAdapter
+@implementation MaioInterstitialImmediateResponseAdapter
 
 /// Declared  by `MPFullscreenAdAdapter+Private.h`
 /// Initialized by `MPFullscreenAdAdapter -init`

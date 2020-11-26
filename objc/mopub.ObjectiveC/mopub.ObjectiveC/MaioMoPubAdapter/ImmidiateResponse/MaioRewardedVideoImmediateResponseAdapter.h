@@ -1,5 +1,5 @@
 //
-//  MaioInterstitialImmidiateResponseAdapter.h
+//  MaioRewardedVideoImmediateResponseApdapter.h
 //  mopub.ObjectiveC
 //
 //  Created by im-ttmskk on 2020/11/25.
@@ -11,8 +11,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/// Immidiate response. But fail to load ad when initialize media.
-@interface MaioInterstitialImmidiateResponseAdapter : MPFullscreenAdAdapter <MPThirdPartyFullscreenAdAdapter>
+/// Immediate response. But fail to load ad when initialize media.
+@interface MaioRewardedVideoImmediateResponseAdapter : MPFullscreenAdAdapter <MPThirdPartyFullscreenAdAdapter>
 
 @end
 
