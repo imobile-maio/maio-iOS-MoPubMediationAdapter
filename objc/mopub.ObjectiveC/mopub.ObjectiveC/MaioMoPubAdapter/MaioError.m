@@ -26,6 +26,10 @@
     return [self errorWithReason:@"If GDPR is required do not initialize maio SDK"];
 }
 
++(NSError *)notReadyYet {
+    return [self errorWithReason:@"You requested a response immediately, but maio isn't ready yet."];
+}
+
 +(NSError *) errorWithReason:(NSString *)reason {
     return [NSError errorWithDomain:@"jp.maio"
                                code:0
