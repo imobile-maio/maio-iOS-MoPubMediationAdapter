@@ -75,7 +75,7 @@
         return;
     }
 
-    if ([manager hasDelegate:self forMediaId:mediaId]) {
+    if (![manager hasDelegate:self forMediaId:mediaId]) {
         [manager addDelegate:self forMediaId:mediaId];
     }
 
