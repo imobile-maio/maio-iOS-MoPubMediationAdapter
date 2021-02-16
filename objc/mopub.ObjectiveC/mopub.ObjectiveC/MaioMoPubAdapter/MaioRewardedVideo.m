@@ -160,6 +160,14 @@
     [self.delegate fullscreenAdAdapterAdDidDisappear:self];
     MPLogAdEvent([MPLogEvent adWillDisappearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
     MPLogAdEvent([MPLogEvent adDidDisappearForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
+
+    /// Added by MoPubSDK 5.15.0
+    /// https://developers.mopub.com/networks/integrate/build-adapters-ios/#quick-start-for-fullscreen-ads
+    SEL selector = NSSelectorFromString(@"fullscreenAdAdapterAdDidDismiss:");
+    if ([self.delegate respondsToSelector:selector]) {
+        [self.delegate performSelector:selector withObject:self];
+        MPLogAdEvent([MPLogEvent adDidDismissModalForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
+    }
 }
 
 - (void)maioDidFinishAd:(NSString *)zoneId playtime:(NSInteger)playtime skipped:(BOOL)skipped rewardParam:(NSString *)rewardParam {
