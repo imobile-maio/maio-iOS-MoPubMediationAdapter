@@ -163,10 +163,12 @@
 
     /// Added by MoPubSDK 5.15.0
     /// https://developers.mopub.com/networks/integrate/build-adapters-ios/#quick-start-for-fullscreen-ads
-    SEL selector = NSSelectorFromString(@"fullscreenAdAdapterAdDidDismiss:");
-    if ([self.delegate respondsToSelector:selector]) {
-        [self.delegate performSelector:selector withObject:self];
-        MPLogAdEvent([MPLogEvent adDidDismissModalForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
+    {
+        SEL selector = NSSelectorFromString(@"fullscreenAdAdapterAdDidDismiss:");
+        if ([self.delegate respondsToSelector:selector]) {
+            [self.delegate performSelector:selector withObject:self];
+            MPLogAdEvent([MPLogEvent adDidDismissModalForAdapter:NSStringFromClass(self.class)], _credentials.zoneId);
+        }
     }
 }
 
