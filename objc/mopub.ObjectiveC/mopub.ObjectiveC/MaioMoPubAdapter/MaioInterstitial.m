@@ -9,8 +9,6 @@
 #import "MaioCredentials.h"
 #import "MaioManager.h"
 #import "MaioError.h"
-#import "MPLogging.h"
-#import "MoPub.h"
 
 @interface MaioInterstitial ()
 

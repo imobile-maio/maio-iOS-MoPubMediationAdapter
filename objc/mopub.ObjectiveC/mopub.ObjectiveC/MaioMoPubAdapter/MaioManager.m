@@ -9,8 +9,14 @@
 #import <Maio/Maio.h>
 #import "MaioError.h"
 #import "MaioCredentials.h"
-#import "MoPub.h"
 #import "MaioAdStockOutRegister.h"
+#if __has_include(<MoPubSDK/MoPub.h>)
+    #import <MoPubSDK/MoPub.h>
+#elif __has_include(<MoPub/MoPub.h>)
+    #import <MoPub/MoPub.h>
+#else
+    #import "MoPub.h"
+#endif
 
 @interface MaioGeneralDelegate : NSObject <MaioDelegate>
 @end

@@ -9,8 +9,6 @@
 #import "MaioRewardedVideoImmediateResponseAdapter.h"
 #import <Maio/Maio.h>
 
-#import "MPLogging.h"
-#import "MPRewardedVideoReward.h"
 #import "MaioManager.h"
 #import "MaioError.h"
 #import "MaioCredentials.h"

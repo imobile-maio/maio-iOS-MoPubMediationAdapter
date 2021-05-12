@@ -6,7 +6,13 @@
 //
 
 #import "MaioCredentials.h"
-#import "MPLogging.h"
+#if __has_include(<MoPubSDK/MoPub.h>)
+    #import <MoPubSDK/MoPub.h>
+#elif __has_include(<MoPub/MoPub.h>)
+    #import <MoPub/MoPub.h>
+#else
+    #import "MPLogging.h"
+#endif
 
 @implementation MaioCredentials {
     NSString *_mediaId;
