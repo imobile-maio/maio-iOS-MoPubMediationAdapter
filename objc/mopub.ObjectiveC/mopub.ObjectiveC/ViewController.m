@@ -19,7 +19,7 @@
 #define AD_UNIT_ID_INTER @"SET_YOUR_AD_UNIT_ID"
 #define AD_UNIT_ID_REWARD @"SET_YOUR_AD_UNIT_ID"
 
-@interface ViewController () <MPInterstitialAdControllerDelegate, MPRewardedVideoDelegate>
+@interface ViewController () <MPInterstitialAdControllerDelegate, MPRewardedVideoDelegate, MPRewardedAdsDelegate>
 
 @property(nonatomic, retain) MPInterstitialAdController *_Nullable interstitial;
 
@@ -188,6 +188,58 @@
 
 - (void)rewardedVideoAdShouldRewardForAdUnitID:(NSString *)adUnitID reward:(MPRewardedVideoReward *)reward {
     NSLog(@"10: rewardedVideoAdShouldRewardForAdUnitID: %@", reward);
+}
+
+#pragma mark - RewardedAd Delegates
+
+
+- (void)rewardedAdDidLoadForAdUnitID:(NSString *)adUnitID {
+    NSLog(@"1: rewardedAdDidLoadForAdUnitID");
+}
+
+- (void)rewardedAdDidExpireForAdUnitID:(NSString *)adUnitID {
+    NSLog(@"2: rewardedAdDidExpireForAdUnitID");
+}
+
+- (void)rewardedAdDidFailToLoadForAdUnitID:(NSString *)adUnitID error:(NSError *)error {
+    NSLog(@"3: rewardedAdDidFailToLoadForAdUnitID");
+}
+
+- (void)rewardedAdDidFailToShowForAdUnitID:(NSString *)adUnitID error:(NSError *)error {
+    NSLog(@"4: rewardedAdDidFailToShowForAdUnitID");
+}
+
+- (void)rewardedAdWillPresentForAdUnitID:(NSString *)adUnitID {
+    NSLog(@"5: rewardedAdWillPresentForAdUnitID");
+}
+
+- (void)rewardedAdDidPresentForAdUnitID:(NSString *)adUnitID {
+    NSLog(@"6: rewardedAdDidPresentForAdUnitID");
+}
+
+- (void)rewardedAdWillDismissForAdUnitID:(NSString *)adUnitID {
+    NSLog(@"7: rewardedAdWillDismissForAdUnitID");
+}
+
+- (void)rewardedAdDidDismissForAdUnitID:(NSString *)adUnitID {
+    NSLog(@"8: rewardedAdDidDismissForAdUnitID");
+}
+
+- (void)rewardedAdDidReceiveTapEventForAdUnitID:(NSString *)adUnitID {
+    NSLog(@"9: rewardedAdDidReceiveTapEventForAdUnitID");
+}
+
+- (void)rewardedAdWillLeaveApplicationForAdUnitID:(NSString *)adUnitID {
+    NSLog(@"10: rewardedAdWillLeaveApplicationForAdUnitID");
+
+}
+
+- (void)rewardedAdShouldRewardForAdUnitID:(NSString *)adUnitID reward:(MPReward *)reward {
+    NSLog(@"11: rewardedAdShouldRewardForAdUnitID: %@", reward);
+}
+
+- (void)didTrackImpressionWithAdUnitID:(NSString *)adUnitID impressionData:(MPImpressionData *)impressionData {
+    NSLog(@"12: didTrackImpressionWithAdUnitID: %@", impressionData);
 }
 
 @end
