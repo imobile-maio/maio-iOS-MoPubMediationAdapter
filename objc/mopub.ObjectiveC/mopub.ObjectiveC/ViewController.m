@@ -8,6 +8,14 @@
 #import "ViewController.h"
 #import "MaioAdapterConfiguration.h"
 
+#if __has_include(<MoPubSDK/MoPub.h>)
+    #import <MoPubSDK/MoPub.h>
+#elif __has_include(<MoPub/MoPub.h>)
+    #import <MoPub/MoPub.h>
+#else
+    #import "MoPub.h"
+#endif
+
 #define AD_UNIT_ID_INTER @"SET_YOUR_AD_UNIT_ID"
 #define AD_UNIT_ID_REWARD @"SET_YOUR_AD_UNIT_ID"
 

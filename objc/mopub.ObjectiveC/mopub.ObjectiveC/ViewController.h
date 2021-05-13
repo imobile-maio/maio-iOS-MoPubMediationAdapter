@@ -6,7 +6,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "MoPub.h"
 
 @interface ViewController : UIViewController
 @end
