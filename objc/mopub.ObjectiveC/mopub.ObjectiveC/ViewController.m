@@ -52,8 +52,8 @@
         [[MoPub sharedInstance] initializeSdkWithConfiguration:sdkConfig completion:^{
             NSLog(@"SDK initialization complete");
         }];
-        [MPRewardedVideo loadRewardedVideoAdWithAdUnitID:AD_UNIT_ID_REWARD withMediationSettings:nil];
-        [MPRewardedVideo setDelegate:self forAdUnitId:AD_UNIT_ID_REWARD];
+        [MPRewardedAds loadRewardedAdWithAdUnitID:AD_UNIT_ID_REWARD withMediationSettings:nil];
+        [MPRewardedAds setDelegate:self forAdUnitId:AD_UNIT_ID_REWARD];
     });
 }
 
@@ -87,14 +87,14 @@
 
 - (IBAction)showAdButton:(UIButton *)sender {
 
-    if ([MPRewardedVideo hasAdAvailableForAdUnitID:AD_UNIT_ID_REWARD]) {
-        [MPRewardedVideo presentRewardedVideoAdForAdUnitID:AD_UNIT_ID_REWARD fromViewController:self withReward:nil];
+    if ([MPRewardedAds hasAdAvailableForAdUnitID:AD_UNIT_ID_REWARD]) {
+        [MPRewardedAds presentRewardedAdForAdUnitID:AD_UNIT_ID_REWARD fromViewController:self withReward:nil];
     }
 }
 
 - (IBAction)loadRewardAdButton:(UIButton *)sender {
-    [MPRewardedVideo loadRewardedVideoAdWithAdUnitID:AD_UNIT_ID_REWARD withMediationSettings:nil];
-    [MPRewardedVideo setDelegate:self forAdUnitId:AD_UNIT_ID_REWARD];
+    [MPRewardedAds loadRewardedAdWithAdUnitID:AD_UNIT_ID_REWARD withMediationSettings:nil];
+    [MPRewardedAds setDelegate:self forAdUnitId:AD_UNIT_ID_REWARD];
 }
 
 #pragma mark - Interstitial Ad Delegates
