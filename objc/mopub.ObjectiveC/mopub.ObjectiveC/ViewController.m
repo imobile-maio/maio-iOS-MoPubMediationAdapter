@@ -19,7 +19,7 @@
 #define AD_UNIT_ID_INTER @"SET_YOUR_AD_UNIT_ID"
 #define AD_UNIT_ID_REWARD @"SET_YOUR_AD_UNIT_ID"
 
-@interface ViewController () <MPInterstitialAdControllerDelegate, MPRewardedVideoDelegate, MPRewardedAdsDelegate>
+@interface ViewController () <MPInterstitialAdControllerDelegate, MPRewardedAdsDelegate>
 
 @property(nonatomic, retain) MPInterstitialAdController *_Nullable interstitial;
 
@@ -137,57 +137,6 @@
 - (void)interstitialDidReceiveTapEvent:(MPInterstitialAdController *)interstitial {
     NSLog(@"8: interstitialDidReceiveTapEvent");
 
-}
-
-#pragma mark - RewardedVideo Delegates
-
-
-- (void)rewardedVideoAdDidLoadForAdUnitID:(NSString *)adUnitID {
-    NSLog(@"1: rewardedVideoAdDidLoadForAdUnitID");
-}
-
-- (void)rewardedVideoAdDidExpireForAdUnitID:(NSString *)adUnitID {
-    NSLog(@"2: rewardedVideoAdDidExpireForAdUnitID");
-
-}
-
-- (void)rewardedVideoAdDidFailToPlayForAdUnitID:(NSString *)adUnitID error:(NSError *)error {
-    NSLog(@"3: rewardedVideoAdDidFailToPlayForAdUnitID");
-
-}
-
-- (void)rewardedVideoAdWillAppearForAdUnitID:(NSString *)adUnitID {
-    NSLog(@"4: rewardedVideoAdWillAppearForAdUnitID");
-
-}
-
-- (void)rewardedVideoAdDidAppearForAdUnitID:(NSString *)adUnitID {
-    NSLog(@"5: rewardedVideoAdDidAppearForAdUnitID");
-
-}
-
-- (void)rewardedVideoAdWillDisappearForAdUnitID:(NSString *)adUnitID {
-    NSLog(@"6: rewardedVideoAdWillDisappearForAdUnitID");
-
-}
-
-- (void)rewardedVideoAdDidDisappearForAdUnitID:(NSString *)adUnitID {
-    NSLog(@"7: rewardedVideoAdDidDisappearForAdUnitID");
-
-}
-
-- (void)rewardedVideoAdDidReceiveTapEventForAdUnitID:(NSString *)adUnitID {
-    NSLog(@"8: rewardedVideoAdDidReceiveTapEventForAdUnitID");
-
-}
-
-- (void)rewardedVideoAdWillLeaveApplicationForAdUnitID:(NSString *)adUnitID {
-    NSLog(@"9: rewardedVideoAdWillLeaveApplicationForAdUnitID");
-
-}
-
-- (void)rewardedVideoAdShouldRewardForAdUnitID:(NSString *)adUnitID reward:(MPRewardedVideoReward *)reward {
-    NSLog(@"10: rewardedVideoAdShouldRewardForAdUnitID: %@", reward);
 }
 
 #pragma mark - RewardedAd Delegates
