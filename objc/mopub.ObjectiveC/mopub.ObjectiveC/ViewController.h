@@ -8,8 +8,6 @@
 #import <UIKit/UIKit.h>
 #import "MoPub.h"
 
-@interface ViewController : UIViewController <MPInterstitialAdControllerDelegate, MPRewardedVideoDelegate>
-@property(nonatomic, retain) MPInterstitialAdController *_Nullable interstitial;
-
+@interface ViewController : UIViewController
 @end
 

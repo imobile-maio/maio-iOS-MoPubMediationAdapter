@@ -11,7 +11,10 @@
 #define AD_UNIT_ID_INTER @"SET_YOUR_AD_UNIT_ID"
 #define AD_UNIT_ID_REWARD @"SET_YOUR_AD_UNIT_ID"
 
-@interface ViewController ()
+@interface ViewController () <MPInterstitialAdControllerDelegate, MPRewardedVideoDelegate>
+
+@property(nonatomic, retain) MPInterstitialAdController *_Nullable interstitial;
+
 - (IBAction)loadAdButton:(UIButton *)sender;
 
 - (IBAction)showAdButton:(UIButton *)sender;
