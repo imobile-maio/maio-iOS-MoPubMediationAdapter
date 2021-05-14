@@ -12,7 +12,7 @@
 #elif __has_include(<MoPub/MoPub.h>)
     #import <MoPub/MoPub.h>
 #else
-    #import "MPFullscreenAdAdapter.h"
+    #import "MoPub.h"
 #endif
 
 @interface MaioInterstitial : MPFullscreenAdAdapter <MPThirdPartyFullscreenAdAdapter, MaioDelegate>

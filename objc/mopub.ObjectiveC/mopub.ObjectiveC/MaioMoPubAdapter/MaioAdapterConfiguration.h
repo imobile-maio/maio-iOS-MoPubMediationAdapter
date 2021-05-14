@@ -11,7 +11,7 @@
 #elif __has_include(<MoPub/MoPub.h>)
     #import <MoPub/MoPub.h>
 #else
-    #import "MPBaseAdapterConfiguration.h"
+    #import "MoPub.h"
 #endif
 
 @interface MaioAdapterConfiguration : MPBaseAdapterConfiguration
