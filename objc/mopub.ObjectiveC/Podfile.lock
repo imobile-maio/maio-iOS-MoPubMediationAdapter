@@ -1,23 +1,23 @@
 PODS:
-  - mopub-ios-sdk (5.13.0):
-    - mopub-ios-sdk/MoPubSDK (= 5.13.0)
-  - mopub-ios-sdk/Core (5.13.0)
-  - mopub-ios-sdk/MoPubSDK (5.13.0):
+  - mopub-ios-sdk (5.17.0):
+    - mopub-ios-sdk/MoPubSDK (= 5.17.0)
+  - mopub-ios-sdk/Core (5.17.0)
+  - mopub-ios-sdk/MoPubSDK (5.17.0):
     - mopub-ios-sdk/Core
     - mopub-ios-sdk/NativeAds
-  - mopub-ios-sdk/NativeAds (5.13.0):
+  - mopub-ios-sdk/NativeAds (5.17.0):
     - mopub-ios-sdk/Core
 
 DEPENDENCIES:
-  - mopub-ios-sdk (~> 5.13.0)
+  - mopub-ios-sdk (~> 5.17.0)
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs:
     - mopub-ios-sdk
 
 SPEC CHECKSUMS:
-  mopub-ios-sdk: 10865909734ce73d755dc23003a381497fbbb792
+  mopub-ios-sdk: 36d322902674b79b0560a1cb8d15af0548d364ea
 
-PODFILE CHECKSUM: 3200ab4ea9afdf896a4a63620b05691ca85be545
+PODFILE CHECKSUM: 46861713182ee48f1e2d1ba799d093a686f8ad9f
 
 COCOAPODS: 1.10.1

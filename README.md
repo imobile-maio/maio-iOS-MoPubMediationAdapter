@@ -4,7 +4,7 @@
 
 ## Requirement
 
-- MoPubSDK 5.13.0+
+- MoPubSDK 5.17.0+
 
 # Get Started
 
