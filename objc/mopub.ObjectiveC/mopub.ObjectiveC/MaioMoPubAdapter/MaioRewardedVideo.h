@@ -7,7 +7,13 @@
 
 #import <Foundation/Foundation.h>
 #import <Maio/Maio.h>
-#import "MPFullscreenAdAdapter.h"
+#if __has_include(<MoPubSDK/MoPub.h>)
+    #import <MoPubSDK/MoPub.h>
+#elif __has_include(<MoPub/MoPub.h>)
+    #import <MoPub/MoPub.h>
+#else
+    #import "MoPub.h"
+#endif
 
 @interface MaioRewardedVideo : MPFullscreenAdAdapter <MPThirdPartyFullscreenAdAdapter, MaioDelegate>
 

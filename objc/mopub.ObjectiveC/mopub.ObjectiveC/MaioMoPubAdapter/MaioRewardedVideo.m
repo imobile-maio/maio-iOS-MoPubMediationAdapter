@@ -9,9 +9,6 @@
 #import "MaioCredentials.h"
 #import "MaioManager.h"
 #import "MaioError.h"
-#import "MPRewardedVideoReward.h"
-#import "MPLogging.h"
-#import "MoPub.h"
 
 @interface MaioRewardedVideo ()
 

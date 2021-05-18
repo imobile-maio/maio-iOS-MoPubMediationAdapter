@@ -6,7 +6,13 @@
 //  Copyright © 2019 maio. All rights reserved.
 //
 
-#import "MPBaseAdapterConfiguration.h"
+#if __has_include(<MoPubSDK/MoPub.h>)
+    #import <MoPubSDK/MoPub.h>
+#elif __has_include(<MoPub/MoPub.h>)
+    #import <MoPub/MoPub.h>
+#else
+    #import "MoPub.h"
+#endif
 
 @interface MaioAdapterConfiguration : MPBaseAdapterConfiguration
 
