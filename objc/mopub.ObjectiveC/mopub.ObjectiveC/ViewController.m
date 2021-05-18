@@ -8,10 +8,21 @@
 #import "ViewController.h"
 #import "MaioAdapterConfiguration.h"
 
+#if __has_include(<MoPubSDK/MoPub.h>)
+    #import <MoPubSDK/MoPub.h>
+#elif __has_include(<MoPub/MoPub.h>)
+    #import <MoPub/MoPub.h>
+#else
+    #import "MoPub.h"
+#endif
+
 #define AD_UNIT_ID_INTER @"SET_YOUR_AD_UNIT_ID"
 #define AD_UNIT_ID_REWARD @"SET_YOUR_AD_UNIT_ID"
 
-@interface ViewController ()
+@interface ViewController () <MPInterstitialAdControllerDelegate, MPRewardedAdsDelegate>
+
+@property(nonatomic, retain) MPInterstitialAdController *_Nullable interstitial;
+
 - (IBAction)loadAdButton:(UIButton *)sender;
 
 - (IBAction)showAdButton:(UIButton *)sender;
@@ -41,8 +52,8 @@
         [[MoPub sharedInstance] initializeSdkWithConfiguration:sdkConfig completion:^{
             NSLog(@"SDK initialization complete");
         }];
-        [MPRewardedVideo loadRewardedVideoAdWithAdUnitID:AD_UNIT_ID_REWARD withMediationSettings:nil];
-        [MPRewardedVideo setDelegate:self forAdUnitId:AD_UNIT_ID_REWARD];
+        [MPRewardedAds loadRewardedAdWithAdUnitID:AD_UNIT_ID_REWARD withMediationSettings:nil];
+        [MPRewardedAds setDelegate:self forAdUnitId:AD_UNIT_ID_REWARD];
     });
 }
 
@@ -76,14 +87,14 @@
 
 - (IBAction)showAdButton:(UIButton *)sender {
 
-    if ([MPRewardedVideo hasAdAvailableForAdUnitID:AD_UNIT_ID_REWARD]) {
-        [MPRewardedVideo presentRewardedVideoAdForAdUnitID:AD_UNIT_ID_REWARD fromViewController:self withReward:nil];
+    if ([MPRewardedAds hasAdAvailableForAdUnitID:AD_UNIT_ID_REWARD]) {
+        [MPRewardedAds presentRewardedAdForAdUnitID:AD_UNIT_ID_REWARD fromViewController:self withReward:nil];
     }
 }
 
 - (IBAction)loadRewardAdButton:(UIButton *)sender {
-    [MPRewardedVideo loadRewardedVideoAdWithAdUnitID:AD_UNIT_ID_REWARD withMediationSettings:nil];
-    [MPRewardedVideo setDelegate:self forAdUnitId:AD_UNIT_ID_REWARD];
+    [MPRewardedAds loadRewardedAdWithAdUnitID:AD_UNIT_ID_REWARD withMediationSettings:nil];
+    [MPRewardedAds setDelegate:self forAdUnitId:AD_UNIT_ID_REWARD];
 }
 
 #pragma mark - Interstitial Ad Delegates
@@ -128,55 +139,56 @@
 
 }
 
-#pragma mark - RewardedVideo Delegates
+#pragma mark - RewardedAd Delegates
 
 
-- (void)rewardedVideoAdDidLoadForAdUnitID:(NSString *)adUnitID {
-    NSLog(@"1: rewardedVideoAdDidLoadForAdUnitID");
+- (void)rewardedAdDidLoadForAdUnitID:(NSString *)adUnitID {
+    NSLog(@"1: rewardedAdDidLoadForAdUnitID");
 }
 
-- (void)rewardedVideoAdDidExpireForAdUnitID:(NSString *)adUnitID {
-    NSLog(@"2: rewardedVideoAdDidExpireForAdUnitID");
-
+- (void)rewardedAdDidExpireForAdUnitID:(NSString *)adUnitID {
+    NSLog(@"2: rewardedAdDidExpireForAdUnitID");
 }
 
-- (void)rewardedVideoAdDidFailToPlayForAdUnitID:(NSString *)adUnitID error:(NSError *)error {
-    NSLog(@"3: rewardedVideoAdDidFailToPlayForAdUnitID");
-
+- (void)rewardedAdDidFailToLoadForAdUnitID:(NSString *)adUnitID error:(NSError *)error {
+    NSLog(@"3: rewardedAdDidFailToLoadForAdUnitID");
 }
 
-- (void)rewardedVideoAdWillAppearForAdUnitID:(NSString *)adUnitID {
-    NSLog(@"4: rewardedVideoAdWillAppearForAdUnitID");
-
+- (void)rewardedAdDidFailToShowForAdUnitID:(NSString *)adUnitID error:(NSError *)error {
+    NSLog(@"4: rewardedAdDidFailToShowForAdUnitID");
 }
 
-- (void)rewardedVideoAdDidAppearForAdUnitID:(NSString *)adUnitID {
-    NSLog(@"5: rewardedVideoAdDidAppearForAdUnitID");
-
+- (void)rewardedAdWillPresentForAdUnitID:(NSString *)adUnitID {
+    NSLog(@"5: rewardedAdWillPresentForAdUnitID");
 }
 
-- (void)rewardedVideoAdWillDisappearForAdUnitID:(NSString *)adUnitID {
-    NSLog(@"6: rewardedVideoAdWillDisappearForAdUnitID");
-
+- (void)rewardedAdDidPresentForAdUnitID:(NSString *)adUnitID {
+    NSLog(@"6: rewardedAdDidPresentForAdUnitID");
 }
 
-- (void)rewardedVideoAdDidDisappearForAdUnitID:(NSString *)adUnitID {
-    NSLog(@"7: rewardedVideoAdDidDisappearForAdUnitID");
-
+- (void)rewardedAdWillDismissForAdUnitID:(NSString *)adUnitID {
+    NSLog(@"7: rewardedAdWillDismissForAdUnitID");
 }
 
-- (void)rewardedVideoAdDidReceiveTapEventForAdUnitID:(NSString *)adUnitID {
-    NSLog(@"8: rewardedVideoAdDidReceiveTapEventForAdUnitID");
-
+- (void)rewardedAdDidDismissForAdUnitID:(NSString *)adUnitID {
+    NSLog(@"8: rewardedAdDidDismissForAdUnitID");
 }
 
-- (void)rewardedVideoAdWillLeaveApplicationForAdUnitID:(NSString *)adUnitID {
-    NSLog(@"9: rewardedVideoAdWillLeaveApplicationForAdUnitID");
+- (void)rewardedAdDidReceiveTapEventForAdUnitID:(NSString *)adUnitID {
+    NSLog(@"9: rewardedAdDidReceiveTapEventForAdUnitID");
+}
+
+- (void)rewardedAdWillLeaveApplicationForAdUnitID:(NSString *)adUnitID {
+    NSLog(@"10: rewardedAdWillLeaveApplicationForAdUnitID");
 
 }
 
-- (void)rewardedVideoAdShouldRewardForAdUnitID:(NSString *)adUnitID reward:(MPRewardedVideoReward *)reward {
-    NSLog(@"10: rewardedVideoAdShouldRewardForAdUnitID: %@", reward);
+- (void)rewardedAdShouldRewardForAdUnitID:(NSString *)adUnitID reward:(MPReward *)reward {
+    NSLog(@"11: rewardedAdShouldRewardForAdUnitID: %@", reward);
+}
+
+- (void)didTrackImpressionWithAdUnitID:(NSString *)adUnitID impressionData:(MPImpressionData *)impressionData {
+    NSLog(@"12: didTrackImpressionWithAdUnitID: %@", impressionData);
 }
 
 @end
